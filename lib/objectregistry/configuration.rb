@@ -59,8 +59,8 @@ module ObjectRegistry
   class Configuration
 
 
-    def initialize(repository_, patterns_, types_, categories_)  # :nodoc:
-      @repository = repository_
+    def initialize(registry_, patterns_, types_, categories_)  # :nodoc:
+      @registry = registry_
       @patterns = patterns_
       @types = types_
       @categories = categories_
@@ -73,18 +73,24 @@ module ObjectRegistry
     end
 
 
+    # Lock the configuration, preventing further changes.
+
     def lock
       @locked = true
     end
 
+
+    # Returns true if this configuration has been locked.
 
     def locked?
       @locked
     end
 
 
-    def repository
-      @repository
+    # Returns the registry that owns this configuration.
+
+    def registry
+      @registry
     end
 
 
