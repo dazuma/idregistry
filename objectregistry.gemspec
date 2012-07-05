@@ -38,7 +38,7 @@
   s_.name = 'objectregistry'
   s_.summary = 'ObjectRegistry is a generic object generator and identity map for Ruby.'
   s_.description = "ObjectRegistry is a generic object generator and identity map for Ruby."
-  s_.version = "#{::File.read('Version').strip}.build#{::Time.now.utc.strftime('%Y%m%d%H%M%S')}"
+  s_.version = "#{::File.read('Version').strip}.nonrelease"
   s_.author = 'Daniel Azuma'
   s_.email = 'dazuma@gmail.com'
   s_.homepage = 'http://github.com/dazuma/objectregistry'
