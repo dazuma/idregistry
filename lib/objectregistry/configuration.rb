@@ -40,13 +40,6 @@ require 'blockenspiel'
 module ObjectRegistry
 
 
-  # Raised if you attempt to modify the configuration of a registry for which
-  # the configuration has been locked because you've started to add data.
-
-  class ConfigurationLockedError < ::RuntimeError
-  end
-
-
   # A registry configuration.
   #
   # Access this API by calling the configuration method of a registry.
@@ -154,40 +147,61 @@ module ObjectRegistry
     end
 
 
-    # Add a pattern to the configuration. You may either pass parameters
-    # or pass a block that utilizes the PatternAdder DSL.
+    # Add a pattern to the configuration.
     #
-    # [<tt>pattern_</tt>]
-    #   The pattern to recognize. Must be an array.
-    # [<tt>type_</tt>]
-    #   The type of object this pattern should correspond to.
-    #   Must be a string or a symbol.
-    # [<tt>gen_obj_</tt>]
-    #   A proc that is called to generate the appropriate object given a
-    #   tuple.
-    # [<tt>gen_tuple_</tt>]
-    #   A proc that is called to generate the tuple given an object.
+    # You may use one of the following call sequences:
+    #
+    # [<tt>add_pattern( <i>pattern</i>, <i>gen_obj_proc</i> )</tt>]
+    #   Add a simple pattern, using the given proc to generate objects
+    #   matching that pattern.
+    #
+    # [<tt>add_pattern( <i>pattern</i> ) { ... }</tt>]
+    #   Add a simple pattern, using the given block to generate objects
+    #   matching that pattern.
+    #
+    # [<tt>add_pattern( <i>pattern</i>, <i>type</i>, <i>gen_obj_proc</i>, <i>gen_tuple_proc</i> )</tt>]
+    #   Add a complex pattern for the given type. You should provide both
+    #   a proc to generate objects, and a proc to generate a tuple from an
+    #   object.
+    #
+    # [<tt>add_pattern() { ... }</tt>]
+    #   Utilize a PatternAdder DSL to define the pattern.
 
-    def add_pattern(pattern_=nil, type_=nil, gen_obj_=nil, gen_tuple_=nil, &block_)
+    def add_pattern(*args_, &block_)
       raise ConfigurationLockedError if @locked
       if block_
-        adder_ = PatternAdder._new(pattern_, type_, gen_obj_, gen_tuple_)
-        ::Blockenspiel.invoke(block_, adder_)
-        pattern_ = adder_.pattern
-        type_ = adder_.type
-        gen_obj_ = adder_._gen_obj_block
-        gen_tuple_ = adder_._gen_tuple_block
-      end
-      pattern_ ||= []
-      gen_obj_ ||= proc{nil}
-      gen_tuple_ ||= proc{|obj_| []}
-      if @patterns.has_key?(pattern_)
-        false
+        case args_.size
+        when 0
+          adder_ = PatternAdder._new(nil, nil, nil, nil)
+          ::Blockenspiel.invoke(block_, adder_)
+        when 1
+          adder_ = PatternAdder._new(args_[0], nil, block_, nil)
+        else
+          raise IllegalConfigurationError, "Did not recognize call sequence for add_pattern"
+        end
       else
-        @patterns[pattern_] = [type_, gen_obj_, gen_tuple_]
-        (@types[type_] ||= []) << pattern_ if type_
-        true
+        case args_.size
+        when 2
+          adder_ = PatternAdder._new(args_[0], nil, args_[1], nil)
+        when 4
+          adder_ = PatternAdder._new(args_[0], args_[1], args_[2], args_[3])
+        else
+          raise IllegalConfigurationError, "Did not recognize call sequence for add_pattern"
+        end
       end
+      pattern_ = adder_.pattern
+      type_ = adder_.type
+      gen_obj_ = adder_.to_generate_object
+      gen_tuple_ = adder_.to_generate_tuple
+      type_ ||= ::Object.new if gen_tuple_
+      if @patterns.has_key?(pattern_)
+        raise IllegalConfigurationError, "Pattern already exists in add_pattern"
+      end
+      @patterns[pattern_] = [type_, gen_obj_, gen_tuple_]
+      if type_
+        (@types[type_] ||= []) << pattern_
+      end
+      self
     end
 
 
@@ -198,14 +212,13 @@ module ObjectRegistry
     def delete_pattern(pattern_)
       raise ConfigurationLockedError if @locked
       patdata_ = @patterns.delete(pattern_)
-      if patdata_
-        typedata_ = @types[patdata_[0]]
-        typedata_.delete(pattern_)
-        @types.delete(patdata_[0]) if typedata_.empty?
-        true
-      else
-        false
+      if patdata_ && (type_ = patdata_[0])
+        if (typedata_ = @types[type_])
+          typedata_.delete(pattern_)
+          @types.delete(type_) if typedata_.empty?
+        end
       end
+      self
     end
 
 
@@ -217,10 +230,8 @@ module ObjectRegistry
       typedata_ = @types.delete(type_)
       if typedata_
         typedata_.each{ |pat_| @patterns.delete(pat_) }
-        true
-      else
-        false
       end
+      self
     end
 
 
@@ -342,7 +353,11 @@ module ObjectRegistry
     # to generate an object for the given tuple.
 
     def to_generate_object(&block_)
-      @gen_obj = block_
+      if block_
+        @gen_obj = block_
+      else
+        @gen_obj
+      end
     end
 
 
@@ -351,19 +366,11 @@ module ObjectRegistry
     # order to generate the appropriate tuples for looking up the object.
 
     def to_generate_tuple(&block_)
-      @gen_tuple = block_
-    end
-
-
-    dsl_methods false
-
-    def _gen_obj_block  # :nodoc:
-      @gen_obj
-    end
-
-
-    def _gen_tuple_block  # :nodoc:
-      @gen_tuple
+      if block_
+        @gen_tuple = block_
+      else
+        @gen_tuple
+      end
     end
 
 

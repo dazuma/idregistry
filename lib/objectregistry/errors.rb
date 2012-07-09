@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry main file
+# ObjectRegistry exceptions
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,14 +34,31 @@
 ;
 
 
-# ObjectRegistry is a generic object generator and identity map for Ruby.
-
 module ObjectRegistry
+
+
+  class ObjectRegistryError < ::StandardError
+  end
+
+
+  # Raised if you attempt to modify the configuration of a registry for which
+  # the configuration has been locked because you've started to add data.
+
+  class ConfigurationLockedError < ObjectRegistryError
+  end
+
+
+  # Raised if you attempt to make an illegal modification to a configuration.
+
+  class IllegalConfigurationError < ObjectRegistryError
+  end
+
+
+  # Raised if you attempt to add a nil object to the registry, or if you
+  # add an object that is already present under a different tuple or type.
+
+  class ObjectKeyError < ObjectRegistryError
+  end
+
+
 end
-
-
-require 'objectregistry/version'
-require 'objectregistry/utils'
-require 'objectregistry/errors'
-require 'objectregistry/configuration'
-require 'objectregistry/registry'

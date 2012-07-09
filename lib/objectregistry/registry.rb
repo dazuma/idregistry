@@ -49,11 +49,12 @@ module ObjectRegistry
       @tuples = {}
       @objects = {}
       @config = Configuration._new(self, @patterns, @types, @categories)
+      @mutex = ::Mutex.new
     end
 
 
     def inspect  # :nodoc:
-      "#<#{self.class}:0x#{object_id.to_s(16)}>"
+      "#<#{self.class}:0x#{object_id.to_s(16)} size=#{size}>"
     end
 
 
@@ -64,80 +65,10 @@ module ObjectRegistry
     end
 
 
-    # Clear out all cached objects from the registry.
-
-    def clear
-      @tuples.clear
-      @objects.clear
-      @categories.each{ |k_, v_| v_[2].clear }
-    end
-
-
     # Return the number of objects cached in the registry.
 
     def size
       @objects.size
-    end
-
-
-    # Get the object corresponding to the given tuple.
-    # If the tuple is not present, the registry tries to generate the
-    # object for you. Returns nil if it is unable to do so.
-    # The optional args parameter is passed to the object generator.
-
-    def lookup(tuple_, args_={})
-      @config.lock
-      if (objdata_ = @tuples[tuple_])
-        return objdata_[0]
-      end
-      @patterns.each do |pattern_, patdata_|
-        if Utils.matches?(pattern_, tuple_)
-          block_ = patdata_[1]
-          if block_
-            obj_ = case block_.arity
-              when 0 then block_.call
-              when 1 then block_.call(tuple_)
-              when 2 then block_.call(tuple_, self)
-              else block_.call(tuple_, self, args_)
-            end
-            unless obj_.nil?
-              type_ = patdata_[0]
-              objdata_ = [obj_, type_, {}]
-              @objects[obj_.object_id] = objdata_
-              if type_
-                tuple_list_ = @types[type_].map do |pat_|
-                  block_ = @patterns[pat_][2]
-                  block_ ? block_.call(obj_) : nil
-                end
-              else
-                tuple_list_ = [tuple_]
-              end
-              tuple_list_.each do |tup_|
-                _add_tuple(objdata_, tup_) if tup_
-              end
-              return obj_
-            end
-          end
-        end
-      end
-      return nil
-    end
-
-
-    # Add the given object to the registry. You must specify the type of
-    # object, which is used to determine what tuples correspond to it.
-
-    def add(type_, object_)
-      @config.lock
-      return false if object_.nil? || @objects.has_key?(object_.object_id)
-      objdata_ = [object_, type_, {}]
-      @objects[object_.object_id] = objdata_
-      @types[type_].each do |pat_|
-        block_ = @patterns[pat_][2]
-        tup_ = block_ ? block_.call(object_) : nil
-        _add_tuple(objdata_, tup_) if tup_
-      end
-      true
     end
 
 
@@ -151,11 +82,19 @@ module ObjectRegistry
     end
 
 
-    # Returns an array of tuples corresponding to the given object.
+    # Returns an array of all tuples corresponding to the given object,
+    # or the object identified by the given tuple.
     # Returns nil if the given object is not cached in the registry.
+    #
+    # If you pass an Array, it is interpreted as a tuple.
+    # If you pass something other than an Array or a Hash, it is
+    # interpreted as an object.
+    # Otherwise, you can explicitly specify whether you are passing
+    # a tuple or object by using hash named arguments, e.g.
+    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
 
-    def tuples_for(object_)
-      objdata_ = @objects[object_.object_id]
+    def tuples_for(arg_)
+      objdata_ = _get_objdata(arg_)
       objdata_ ? objdata_[2].keys : nil
     end
 
@@ -171,69 +110,6 @@ module ObjectRegistry
 
     def include?(arg_)
       _get_objdata(arg_) ? true : false
-    end
-
-
-    # Delete the given object.
-    #
-    # If you pass an Array, it is interpreted as a tuple.
-    # If you pass something other than an Array or a Hash, it is
-    # interpreted as an object.
-    # Otherwise, you can explicitly specify whether you are passing
-    # a tuple or object by using hash named arguments, e.g.
-    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
-
-    def delete(arg_)
-      objdata_ = _get_objdata(arg_)
-      if objdata_
-        @objects.delete(objdata_[0].object_id)
-        objdata_[2].each_key{ |tup_| _remove_tuple(objdata_, tup_) }
-        return objdata_[0]
-      else
-        return nil
-      end
-    end
-
-
-    # Delete all objects with a tuple matching the given pattern.
-
-    def delete_pattern(pattern_)
-      tuples_ = @tuples.keys.find_all{ |tuple_| Utils.matches?(pattern_, tuple_) }
-      tuples_.each{ |tuple_| delete(tuple_) }
-      tuples_.size
-    end
-
-
-    # Recompute the tuples for the given object, which may be identified
-    # by object or tuple. Call this when the value of the object changes
-    # in such a way that the registry should identify it differently.
-    #
-    # If you pass an Array, it is interpreted as a tuple.
-    # If you pass something other than an Array or a Hash, it is
-    # interpreted as an object.
-    # Otherwise, you can explicitly specify whether you are passing
-    # a tuple or object by using hash named arguments, e.g.
-    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
-
-    def rekey(arg_)
-      objdata_ = _get_objdata(arg_)
-      return nil unless objdata_
-      obj_ = objdata_[0]
-      tuple_hash_ = objdata_[2]
-      type_ = objdata_[1]
-      return obj_ unless type_
-      new_tuple_list_ = @types[type_].map do |pat_|
-        block_ = @patterns[pat_][2]
-        block_ ? block_.call(obj_) : nil
-      end
-      new_tuple_list_.compact!
-      new_tuple_list_.each do |tup_|
-        _add_tuple(objdata_, tup_) unless tuple_hash_.has_key?(tup_)
-      end
-      (tuple_hash_.keys - new_tuple_list_).each do |tup_|
-        _remove_tuple(objdata_, tup_)
-      end
-      obj_
     end
 
 
@@ -266,6 +142,189 @@ module ObjectRegistry
     end
 
 
+    # Get the object corresponding to the given tuple.
+    # If the tuple is not present, the registry tries to generate the
+    # object for you. Returns nil if it is unable to do so.
+    # The optional args parameter is passed to the object generator.
+
+    def lookup(tuple_, args_={})
+      @config.lock
+
+      # Fast-track lookup if it's already there
+      if (objdata_ = @tuples[tuple_])
+        return objdata_[0]
+      end
+
+      # Not there for now. Try to create the object.
+      # We want to do this before entering the synchronize block because
+      # we don't want callbacks called within the synchronization.
+      obj_ = nil
+      type_ = nil
+      @patterns.each do |pattern_, patdata_|
+        if Utils.matches?(pattern_, tuple_)
+          block_ = patdata_[1]
+          obj_ = case block_.arity
+            when 0 then block_.call
+            when 1 then block_.call(tuple_)
+            when 2 then block_.call(tuple_, self)
+            else block_.call(tuple_, self, args_)
+          end
+          unless obj_.nil?
+            type_ = patdata_[0]
+            break
+          end
+        end
+      end
+
+      if obj_
+        # Now attempt to insert the object.
+        # This part is synchronized to protect against concurrent mutation.
+        # Once in the synchronize block, we also double-check that no other
+        # thread added the object in the meantime. If another thread did,
+        # we throw away the object we just created, and return the other
+        # thread's object instead.
+        @mutex.synchronize do
+          if (objdata_ = @tuples[tuple_])
+            obj_ = objdata_[0]
+          else
+            _internal_add(type_, obj_, tuple_)
+          end
+        end
+      end
+      obj_
+    end
+
+
+    # Add the given object to the registry. You must specify the type of
+    # object, which is used to determine what tuples correspond to it.
+
+    def add(type_, object_)
+      @config.lock
+
+      # Some sanity checks of the arguments.
+      if object_.nil?
+        raise ObjectKeyError, "Attempt to add a nil object"
+      end
+      unless @types.has_key?(type_)
+        raise ObjectKeyError, "Unrecognized type: #{type_}"
+      end
+
+      # Synchronize the actual add to protect against concurrent mutation.
+      @mutex.synchronize do
+        _internal_add(type_, object_, nil)
+      end
+      self
+    end
+
+
+    # Delete the given object.
+    #
+    # If you pass an Array, it is interpreted as a tuple.
+    # If you pass something other than an Array or a Hash, it is
+    # interpreted as an object.
+    # Otherwise, you can explicitly specify whether you are passing
+    # a tuple or object by using hash named arguments, e.g.
+    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
+
+    def delete(arg_)
+      @mutex.synchronize do
+        if (objdata_ = _get_objdata(arg_))
+          @objects.delete(objdata_[0].object_id)
+          objdata_[2].each_key{ |tup_| _remove_tuple(objdata_, tup_) }
+        end
+      end
+      self
+    end
+
+
+    # Delete all objects with a tuple matching the given pattern.
+
+    def delete_pattern(pattern_)
+      @mutex.synchronize do
+        tuples_ = @tuples.keys.find_all{ |tuple_| Utils.matches?(pattern_, tuple_) }
+        tuples_.each do |tuple_|
+          objdata_ = @tuples[tuple_]
+          @objects.delete(objdata_[0].object_id)
+          objdata_[2].each_key{ |tup_| _remove_tuple(objdata_, tup_) }
+        end
+      end
+      self
+    end
+
+
+    # Recompute the tuples for the given object, which may be identified
+    # by object or tuple. Call this when the value of the object changes
+    # in such a way that the registry should identify it differently.
+    #
+    # If you pass an Array, it is interpreted as a tuple.
+    # If you pass something other than an Array or a Hash, it is
+    # interpreted as an object.
+    # Otherwise, you can explicitly specify whether you are passing
+    # a tuple or object by using hash named arguments, e.g.
+    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
+
+    def rekey(arg_)
+      # Resolve the object and check that the pattern is complex.
+      if (objdata_ = _get_objdata(arg_))
+        if (type_ = objdata_[1])
+
+          # Look up tuple generators from the type, and determine the
+          # new tuples for the object.
+          # Do this before entering the synchronize block because we
+          # don't want callbacks called within the synchronization.
+          obj_ = objdata_[0]
+          new_tuple_list_ = []
+          @types[type_].each do |pat_|
+            if (block_ = @patterns[pat_][2])
+              new_tuple_ = block_.call(obj_)
+              new_tuple_list_ << new_tuple_ if new_tuple_
+            end
+          end
+
+          # Synchronize to protect against concurrent mutation.
+          @mutex.synchronize do
+            # One last check to ensure the object is still present
+            if @objects.has_key?(obj_.object_id)
+              # Ensure none of the new tuples isn't pointed elsewhere already.
+              # Tuples pointed at this object, ignore them.
+              # Tuples pointed at another object, raise an error.
+              tuple_hash_ = objdata_[2]
+              new_tuple_list_.delete_if do |tup_|
+                if tuple_hash_.has_key?(tup_)
+                  true
+                elsif @tuples.has_key?(tup_)
+                  raise ObjectKeyError, "Could not rekey because one of the new tuples is already present"
+                else
+                  false
+                end
+              end
+              # Now go through and edit the tuples
+              new_tuple_list_.each do |tup_|
+                _add_tuple(objdata_, tup_)
+              end
+              (tuple_hash_.keys - new_tuple_list_).each do |tup_|
+                _remove_tuple(objdata_, tup_)
+              end
+            end
+          end
+        end
+      end
+      self
+    end
+
+
+    # Clear out all cached objects from the registry.
+
+    def clear
+      @mutex.synchronize do
+        @tuples.clear
+        @objects.clear
+        @categories.each{ |k_, v_| v_[2].clear }
+      end
+      self
+    end
+
+
     def _get_objdata(arg_)  # :nodoc:
       case arg_
       when ::Array
@@ -285,6 +344,50 @@ module ObjectRegistry
     private :_get_objdata
 
 
+    # Internal add method.
+    # This needs to be called within synchronization.
+
+    def _internal_add(type_, obj_, tuple_)  # :nodoc:
+      # Check if this object is present already.
+      if (objdata_ = @objects[obj_.object_id])
+        # The object is present already. If it has the right type,
+        # then just return the object and don't regenerate tuples.
+        # If it has the wrong type, give up.
+        if objdata_[1] != type_
+          raise ObjectKeyError, "Object is already present with type #{objdata_[1]}"
+        end
+      else
+        # Object is not present.
+        # Generate list of tuples to add, and make sure they are unique.
+        if type_
+          tuple_list_ = []
+          @types[type_].map do |pat_|
+            if (block_ = @patterns[pat_][2])
+              if (tup_ = block_.call(obj_))
+                if @tuples.has_key?(tup_)
+                  raise ObjectKeyError, "New object wants to overwrite an existing tuple: #{tup_.inspect}"
+                end
+                tuple_list_ << tup_
+              end
+            end
+          end
+        else
+          tuple_list_ = [tuple_]
+        end
+
+        # Insert the object. This is the actual mutation.
+        objdata_ = [obj_, type_, {}]
+        @objects[obj_.object_id] = objdata_
+        tuple_list_.each do |tup_|
+          _add_tuple(objdata_, tup_) if tup_
+        end
+      end
+    end
+    private :_internal_add
+
+
+    # This needs to be called within synchronization.
+
     def _add_tuple(objdata_, tuple_)  # :nodoc:
       return false if @tuples.has_key?(tuple_)
       @tuples[tuple_] = objdata_
@@ -301,6 +404,8 @@ module ObjectRegistry
     end
     private :_add_tuple
 
+
+    # This needs to be called within synchronization.
 
     def _remove_tuple(objdata_, tuple_)  # :nodoc:
       tupcats_ = objdata_[2][tuple_]
