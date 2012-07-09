@@ -50,7 +50,7 @@ module ObjectRegistry
 
 
       def setup
-        @config = ObjectRegistry.create.configuration
+        @config = ObjectRegistry.create.config
       end
 
 

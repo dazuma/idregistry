@@ -51,12 +51,20 @@ module ObjectRegistry
 
   class Configuration
 
+    include ::Blockenspiel::DSL
 
-    def initialize(registry_, patterns_, types_, categories_)  # :nodoc:
+    dsl_methods false
+
+
+    class AnonymousType; end
+
+
+    def initialize(registry_, patterns_, types_, categories_, methods_)  # :nodoc:
       @registry = registry_
       @patterns = patterns_
       @types = types_
       @categories = categories_
+      @methods = methods_
       @locked = false
     end
 
@@ -85,6 +93,26 @@ module ObjectRegistry
     def registry
       @registry
     end
+
+
+    # Create a new empty registry, duplicating this configuration.
+    # The new registry will have an unlocked configuration that can be
+    # modified further.
+
+    def spawn_registry
+      patterns_ = {}
+      types_ = {}
+      categories_ = {}
+      methods_ = {}
+      @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
+      @types.each{ |k_, v_| types_[k_] = v_.dup }
+      @categories.each{ |k_, v_| categories_[k_] = [v_[0], v_[1], {}] }
+      @methods.each{ |k_, v_| methods_[k_] = [v_[0], v_[1]] }
+      Registry._new(patterns_, types_, categories_, methods_)
+    end
+
+
+    dsl_methods true
 
 
     # Returns an array of all patterns known by this configuration.
@@ -151,18 +179,21 @@ module ObjectRegistry
     #
     # You may use one of the following call sequences:
     #
-    # [<tt>add_pattern( <i>pattern</i>, <i>gen_obj_proc</i> )</tt>]
-    #   Add a simple pattern, using the given proc to generate objects
-    #   matching that pattern.
-    #
     # [<tt>add_pattern( <i>pattern</i> ) { ... }</tt>]
     #   Add a simple pattern, using the given block to generate objects
     #   matching that pattern.
     #
-    # [<tt>add_pattern( <i>pattern</i>, <i>type</i>, <i>gen_obj_proc</i>, <i>gen_tuple_proc</i> )</tt>]
-    #   Add a complex pattern for the given type. You should provide both
-    #   a proc to generate objects, and a proc to generate a tuple from an
-    #   object.
+    # [<tt>add_pattern( <i>pattern</i>, <i>to_generate_object</i> )</tt>]
+    #   Add a simple pattern, using the given proc to generate objects
+    #   matching that pattern.
+    #
+    # [<tt>add_pattern( <i>pattern</i>, <i>to_generate_object</i>, <i>to_generate_tuple</i> )</tt>]
+    #   Add a simple pattern, using the given proc to generate objects
+    #   matching that pattern, and to generate a tuple from an object.
+    #
+    # [<tt>add_pattern( <i>pattern</i>, <i>type</i>, <i>to_generate_object</i>, <i>to_generate_tuple</i> )</tt>]
+    #   Add a pattern for the given type. You should provide both a proc
+    #   to generate objects, and a proc to generate a tuple from an object.
     #
     # [<tt>add_pattern() { ... }</tt>]
     #   Utilize a PatternAdder DSL to define the pattern.
@@ -181,8 +212,8 @@ module ObjectRegistry
         end
       else
         case args_.size
-        when 2
-          adder_ = PatternAdder._new(args_[0], nil, args_[1], nil)
+        when 2, 3
+          adder_ = PatternAdder._new(args_[0], nil, args_[1], args_[2])
         when 4
           adder_ = PatternAdder._new(args_[0], args_[1], args_[2], args_[3])
         else
@@ -190,17 +221,14 @@ module ObjectRegistry
         end
       end
       pattern_ = adder_.pattern
-      type_ = adder_.type
+      type_ = adder_.type || AnonymousType.new
       gen_obj_ = adder_.to_generate_object
       gen_tuple_ = adder_.to_generate_tuple
-      type_ ||= ::Object.new if gen_tuple_
       if @patterns.has_key?(pattern_)
-        raise IllegalConfigurationError, "Pattern already exists in add_pattern"
+        raise IllegalConfigurationError, "Pattern already exists"
       end
       @patterns[pattern_] = [type_, gen_obj_, gen_tuple_]
-      if type_
-        (@types[type_] ||= []) << pattern_
-      end
+      (@types[type_] ||= []) << pattern_
       self
     end
 
@@ -211,12 +239,11 @@ module ObjectRegistry
 
     def delete_pattern(pattern_)
       raise ConfigurationLockedError if @locked
-      patdata_ = @patterns.delete(pattern_)
-      if patdata_ && (type_ = patdata_[0])
-        if (typedata_ = @types[type_])
-          typedata_.delete(pattern_)
-          @types.delete(type_) if typedata_.empty?
-        end
+      if (patdata_ = @patterns.delete(pattern_))
+        type_ = patdata_[0]
+        typedata_ = @types[type_]
+        typedata_.delete(pattern_)
+        @types.delete(type_) if typedata_.empty?
       end
       self
     end
@@ -227,8 +254,7 @@ module ObjectRegistry
 
     def delete_type(type_)
       raise ConfigurationLockedError if @locked
-      typedata_ = @types.delete(type_)
-      if typedata_
+      if (typedata_ = @types.delete(type_))
         typedata_.each{ |pat_| @patterns.delete(pat_) }
       end
       self
@@ -242,11 +268,10 @@ module ObjectRegistry
     def add_category(category_, pattern_, indexes_)
       raise ConfigurationLockedError if @locked
       if @categories.has_key?(category_)
-        false
-      else
-        @categories[category_] = [pattern_, indexes_, {}]
-        true
+        raise IllegalConfigurationError, "Category already exists"
       end
+      @categories[category_] = [pattern_, indexes_, {}]
+      self
     end
 
 
@@ -254,8 +279,27 @@ module ObjectRegistry
 
     def delete_category(category_)
       raise ConfigurationLockedError if @locked
-      catdata_ = @categories.delete(category_)
-      catdata_ ? true : false
+      @categories.delete(category_)
+      self
+    end
+
+
+    def add_method(name_, pattern_, indexes_)
+      raise ConfigurationLockedError if @locked
+      name_ = name_.to_sym
+      if @methods.has_key?(name_)
+        raise IllegalConfigurationError, "Factory method already exists"
+      end
+      @methods[name_] = [pattern_, indexes_]
+      self
+    end
+
+
+    def delete_method(name_)
+      raise ConfigurationLockedError if @locked
+      name_ = name_.to_sym
+      @methods.delete(name_)
+      self
     end
 
 
@@ -266,21 +310,7 @@ module ObjectRegistry
       @patterns.clear
       @types.clear
       @categories.clear
-    end
-
-
-    # Create a new empty registry, duplicating this configuration.
-    # The new registry will have an unlocked configuration that can be
-    # modified further.
-
-    def spawn_registry
-      patterns_ = {}
-      types_ = {}
-      categories_ = {}
-      @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
-      @types.each{ |k_, v_| types_[k_] = v_.dup }
-      @categories.each{ |k_, v_| categories_[k_] = [v_[0], v_[1], {}] }
-      Registry._new(patterns_, types_, categories_)
+      @methods.clear
     end
 
 

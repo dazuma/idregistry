@@ -42,13 +42,14 @@ module ObjectRegistry
   class Registry
 
 
-    def initialize(patterns_, types_, categories_)  # :nodoc:
+    def initialize(patterns_, types_, categories_, methods_)  # :nodoc:
       @patterns = patterns_
       @types = types_
       @categories = categories_
+      @methods = methods_
       @tuples = {}
       @objects = {}
-      @config = Configuration._new(self, @patterns, @types, @categories)
+      @config = Configuration._new(self, @patterns, @types, @categories, @methods)
       @mutex = ::Mutex.new
     end
 
@@ -60,7 +61,8 @@ module ObjectRegistry
 
     # Get the configuration for this registry
 
-    def configuration
+    def config(&block_)
+      ::Blockenspiel.invoke(block_, @config) if block_
       @config
     end
 
@@ -187,7 +189,7 @@ module ObjectRegistry
           if (objdata_ = @tuples[tuple_])
             obj_ = objdata_[0]
           else
-            _internal_add(type_, obj_, tuple_)
+            _internal_add(type_, obj_)
           end
         end
       end
@@ -211,7 +213,7 @@ module ObjectRegistry
 
       # Synchronize the actual add to protect against concurrent mutation.
       @mutex.synchronize do
-        _internal_add(type_, object_, nil)
+        _internal_add(type_, object_)
       end
       self
     end
@@ -264,47 +266,48 @@ module ObjectRegistry
     # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
 
     def rekey(arg_)
-      # Resolve the object and check that the pattern is complex.
+      # Resolve the object.
       if (objdata_ = _get_objdata(arg_))
-        if (type_ = objdata_[1])
 
-          # Look up tuple generators from the type, and determine the
-          # new tuples for the object.
-          # Do this before entering the synchronize block because we
-          # don't want callbacks called within the synchronization.
-          obj_ = objdata_[0]
-          new_tuple_list_ = []
-          @types[type_].each do |pat_|
-            if (block_ = @patterns[pat_][2])
-              new_tuple_ = block_.call(obj_)
-              new_tuple_list_ << new_tuple_ if new_tuple_
-            end
+        # Look up tuple generators from the type, and determine the
+        # new tuples for the object.
+        # Do this before entering the synchronize block because we
+        # don't want callbacks called within the synchronization.
+        obj_ = objdata_[0]
+        type_ = objdata_[1]
+        new_tuple_list_ = []
+        @types[type_].each do |pat_|
+          if (block_ = @patterns[pat_][2])
+            new_tuple_ = block_.call(obj_)
+            new_tuple_list_ << new_tuple_ if new_tuple_
+          else
+            raise ObjectKeyError, "Not all patterns for this type can generate tuples"
           end
+        end
 
-          # Synchronize to protect against concurrent mutation.
-          @mutex.synchronize do
-            # One last check to ensure the object is still present
-            if @objects.has_key?(obj_.object_id)
-              # Ensure none of the new tuples isn't pointed elsewhere already.
-              # Tuples pointed at this object, ignore them.
-              # Tuples pointed at another object, raise an error.
-              tuple_hash_ = objdata_[2]
-              new_tuple_list_.delete_if do |tup_|
-                if tuple_hash_.has_key?(tup_)
-                  true
-                elsif @tuples.has_key?(tup_)
-                  raise ObjectKeyError, "Could not rekey because one of the new tuples is already present"
-                else
-                  false
-                end
+        # Synchronize to protect against concurrent mutation.
+        @mutex.synchronize do
+          # One last check to ensure the object is still present
+          if @objects.has_key?(obj_.object_id)
+            # Ensure none of the new tuples isn't pointed elsewhere already.
+            # Tuples pointed at this object, ignore them.
+            # Tuples pointed at another object, raise an error.
+            tuple_hash_ = objdata_[2]
+            new_tuple_list_.delete_if do |tup_|
+              if tuple_hash_.has_key?(tup_)
+                true
+              elsif @tuples.has_key?(tup_)
+                raise ObjectKeyError, "Could not rekey because one of the new tuples is already present"
+              else
+                false
               end
-              # Now go through and edit the tuples
-              new_tuple_list_.each do |tup_|
-                _add_tuple(objdata_, tup_)
-              end
-              (tuple_hash_.keys - new_tuple_list_).each do |tup_|
-                _remove_tuple(objdata_, tup_)
-              end
+            end
+            # Now go through and edit the tuples
+            new_tuple_list_.each do |tup_|
+              _add_tuple(objdata_, tup_)
+            end
+            (tuple_hash_.keys - new_tuple_list_).each do |tup_|
+              _remove_tuple(objdata_, tup_)
             end
           end
         end
@@ -322,6 +325,40 @@ module ObjectRegistry
         @categories.each{ |k_, v_| v_[2].clear }
       end
       self
+    end
+
+
+    def method_missing(name_, *args_)
+      if (method_info_ = @methods[name_])
+        tuple_ = method_info_[0].dup
+        indexes_ = method_info_[1]
+        case indexes_
+        when ::Array
+          lookup_args_ = args_.size == indexes_.size + 1 ? args_.pop : {}
+          if lookup_args_.is_a?(::Hash) && args_.size == indexes_.size
+            args_.each_with_index do |a_, i_|
+              if (j_ = indexes_[i_])
+                tuple_[j_] = a_
+              end
+            end
+            return lookup(tuple_, lookup_args_)
+          end
+        when ::Hash
+          lookup_args_ = args_.size == 2 ? args_.pop : {}
+          if lookup_args_.is_a?(::Hash) && args_.size == 1
+            arg_ = args_[0]
+            if arg_.is_a?(::Hash)
+              arg_.each do |k_, v_|
+                if (j_ = indexes_[k_])
+                  tuple_[j_] = v_
+                end
+              end
+              return lookup(tuple_, lookup_args_)
+            end
+          end
+        end
+      end
+      super
     end
 
 
@@ -347,7 +384,7 @@ module ObjectRegistry
     # Internal add method.
     # This needs to be called within synchronization.
 
-    def _internal_add(type_, obj_, tuple_)  # :nodoc:
+    def _internal_add(type_, obj_)  # :nodoc:
       # Check if this object is present already.
       if (objdata_ = @objects[obj_.object_id])
         # The object is present already. If it has the right type,
@@ -359,20 +396,16 @@ module ObjectRegistry
       else
         # Object is not present.
         # Generate list of tuples to add, and make sure they are unique.
-        if type_
-          tuple_list_ = []
-          @types[type_].map do |pat_|
-            if (block_ = @patterns[pat_][2])
-              if (tup_ = block_.call(obj_))
-                if @tuples.has_key?(tup_)
-                  raise ObjectKeyError, "New object wants to overwrite an existing tuple: #{tup_.inspect}"
-                end
-                tuple_list_ << tup_
+        tuple_list_ = []
+        @types[type_].map do |pat_|
+          if (block_ = @patterns[pat_][2])
+            if (tup_ = block_.call(obj_))
+              if @tuples.has_key?(tup_)
+                raise ObjectKeyError, "New object wants to overwrite an existing tuple: #{tup_.inspect}"
               end
+              tuple_list_ << tup_
             end
           end
-        else
-          tuple_list_ = [tuple_]
         end
 
         # Insert the object. This is the actual mutation.
@@ -441,7 +474,7 @@ module ObjectRegistry
     # Create a new, empty registry with an empty configuration.
 
     def create
-      Registry._new({}, {}, {})
+      Registry._new({}, {}, {}, {})
     end
 
 

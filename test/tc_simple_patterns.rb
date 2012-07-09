@@ -50,16 +50,26 @@ module ObjectRegistry
 
       def setup
         @registry = ObjectRegistry.create
-        config_ = @registry.configuration
-        config_.add_pattern([:hello, ::Integer], :hello_numbers,
-          ::Proc.new{ |tuple_| Class1.new(tuple_[1]) },
-          ::Proc.new{ |obj_| [:hello, obj_.value] })
-        config_.add_pattern([:hello, ::Float], :hello_numbers,
-          ::Proc.new{ |tuple_| Class1.new(tuple_[1].to_i) },
-          ::Proc.new{ |obj_| [:hello, obj_.value.to_f] })
-        config_.add_pattern([:world, ::Float], :world_numbers,
-          ::Proc.new{ |tuple_| Class1.new(tuple_[1].to_i) },
-          ::Proc.new{ |obj_| [:world, obj_.value.to_f] })
+        @registry.config do
+          add_pattern do
+            pattern [:hello, ::Integer]
+            type :hello_numbers
+            to_generate_object{ |tuple_| Class1.new(tuple_[1]) }
+            to_generate_tuple{ |obj_| [:hello, obj_.value] }
+          end
+          add_pattern do
+            pattern [:hello, ::Float]
+            type :hello_numbers
+            to_generate_object{ |tuple_| Class1.new(tuple_[1].to_i) }
+            to_generate_tuple{ |obj_| [:hello, obj_.value.to_f] }
+          end
+          add_pattern do
+            pattern [:world, ::Float]
+            type :world_numbers
+            to_generate_object{ |tuple_| Class1.new(tuple_[1].to_i) }
+            to_generate_tuple{ |obj_| [:world, obj_.value.to_f] }
+          end
+        end
       end
 
 
