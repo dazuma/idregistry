@@ -77,14 +77,9 @@ module IDRegistry
     end
 
 
-    # Lock the configuration, preventing further changes.
-
-    def lock
-      @locked = true
-    end
-
-
     # Returns true if this configuration has been locked.
+    # A locked configuration can no longer be modified.
+    # Registries lock their configurations once you start using them.
 
     def locked?
       @locked
@@ -99,36 +94,71 @@ module IDRegistry
 
 
     # Create a new empty registry, duplicating this configuration.
-    # The new registry will have an unlocked configuration that can be
-    # modified further.
+    #
+    # If the <tt>:unlocked</tt> option is set to true, the new registry
+    # will have an unlocked configuration that can be modified further.
+    # Otherwise, the new registry's configuration will be locked.
+    #
+    # Spawning a locked registry from a locked configuration is very fast
+    # because it reuses the configuration objects.
 
-    def spawn_registry
-      patterns_ = {}
-      types_ = {}
-      categories_ = {}
-      methods_ = {}
-      @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
-      @types.each{ |k_, v_| types_[k_] = v_.dup }
-      @categories.each{ |k_, v_| categories_[k_] = [v_[0], v_[1], {}] }
-      @methods.each{ |k_, v_| methods_[k_] = [v_[0], v_[1]] }
-      Registry._new(patterns_, types_, categories_, methods_)
+    def spawn_registry(opts_={})
+      request_unlocked_ = opts_[:unlocked]
+      if @locked && !request_unlocked_
+        reg_ = Registry._new(@patterns, @types, @categories, @methods)
+        reg_.lock
+      else
+        patterns_ = {}
+        types_ = {}
+        categories_ = {}
+        methods_ = {}
+        @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
+        @types.each{ |k_, v_| types_[k_] = v_.dup }
+        @categories.each{ |k_, v_| categories_[k_] = v_.dup }
+        @methods.each{ |k_, v_| methods_[k_] = v_.dup }
+        reg_ = Registry._new(patterns_, types_, categories_, methods_)
+        reg_.lock unless request_unlocked_
+      end
+      reg_
     end
 
 
     dsl_methods true
 
 
+    # Lock the configuration, preventing further changes.
+    #
+    # This is called by registries when you start using them.
+    #
+    # In addition, it is cheap to spawn another registry from a
+    # configuration that is locked, because the configuration internals
+    # can be reused. Therefore, you should lock a configuration if you
+    # want to use it as a template to create empty registries quickly
+    # (using the spawn_registry call).
+
+    def lock
+      @locked = true
+      self
+    end
+
+
     # Returns an array of all patterns known by this configuration.
+    #
+    # The pattern arrays will be duplicates of the actual arrays
+    # stored internally, so you cannot modify patterns in place.
 
     def all_patterns
-      @patterns.keys
+      @patterns.keys.map{ |a_| a_.dup }
     end
 
 
     # Returns an array of all object types known by this configuration.
+    #
+    # Does not include any "anonymous" types that are automatically
+    # generated if you add a pattern without a type.
 
     def all_types
-      @types.keys
+      @types.keys.find_all{ |t_| !t_.is_a?(AnonymousType) }
     end
 
 
@@ -136,6 +166,14 @@ module IDRegistry
 
     def all_categories
       @categories.keys
+    end
+
+
+    # Returns an array of all convenience method names known by this
+    # configuration.
+
+    def all_convenience_methods
+      @methods.keys
     end
 
 
@@ -157,6 +195,13 @@ module IDRegistry
 
     def has_category?(category_)
       @categories.has_key?(category_)
+    end
+
+
+    # Returns true if this configuration includes the given convenience method.
+
+    def has_convenience_method?(method_)
+      @methods.has_key?(method_)
     end
 
 
@@ -264,21 +309,24 @@ module IDRegistry
     end
 
 
-    # Add a category.
+    # Add a category type.
     #
-    # TODO: Need to document what a category is.
+    # You must provide a category type name, a pattern that recognizes
+    # tuples that should trigger this category, and an array of indexes
+    # into the pattern that indicates which tuple element(s) will
+    # identify individual categories within this category type.
 
     def add_category(category_, pattern_, indexes_)
       raise ConfigurationLockedError if @locked
       if @categories.has_key?(category_)
         raise IllegalConfigurationError, "Category already exists"
       end
-      @categories[category_] = [pattern_, indexes_, {}]
+      @categories[category_] = [pattern_, indexes_]
       self
     end
 
 
-    # Remove a category by name.
+    # Remove a category type by name.
 
     def delete_category(category_)
       raise ConfigurationLockedError if @locked
@@ -287,7 +335,14 @@ module IDRegistry
     end
 
 
-    def add_method(name_, pattern_, indexes_)
+    # Add a convenience method, providing a short cut for doing lookups
+    # in the registry. You must provide a pattern that serves as a tuple
+    # template, and an array of indexes. The method will take a number of
+    # arguments corresponding to that array, and the indexes will then be
+    # used as indexes into the pattern, replacing pattern elements to
+    # generate the actual tuple to be looked up.
+
+    def add_convenience_method(name_, pattern_, indexes_)
       raise ConfigurationLockedError if @locked
       name_ = name_.to_sym
       if @methods.has_key?(name_)
@@ -298,7 +353,9 @@ module IDRegistry
     end
 
 
-    def delete_method(name_)
+    # Delete a convenience method by name.
+
+    def delete_convenience_method(name_)
       raise ConfigurationLockedError if @locked
       name_ = name_.to_sym
       @methods.delete(name_)
@@ -306,7 +363,8 @@ module IDRegistry
     end
 
 
-    # Clear all configuration.
+    # Clear all configuration information, including all object types,
+    # patterns, categories, and convenience methods.
 
     def clear
       raise ConfigurationLockedError if @locked
@@ -314,6 +372,7 @@ module IDRegistry
       @types.clear
       @categories.clear
       @methods.clear
+      self
     end
 
 

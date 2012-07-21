@@ -49,6 +49,7 @@ module IDRegistry
       @methods = methods_
       @tuples = {}
       @objects = {}
+      @catdata = {}
       @config = Configuration._new(self, @patterns, @types, @categories, @methods)
       @mutex = ::Mutex.new
     end
@@ -116,6 +117,8 @@ module IDRegistry
 
 
     def categories(arg_)
+      @config.lock
+
       objdata_ = _get_objdata(arg_)
       return nil unless objdata_
       hash_ = {}
@@ -129,17 +132,19 @@ module IDRegistry
 
 
     def objects_in_category(category_, index_)
-      catdata_ = @categories[category_]
-      return nil unless catdata_
-      tuple_hash_ = catdata_[2][index_]
+      @config.lock
+
+      return nil unless @categories.include?(category_)
+      tuple_hash_ = (@catdata[category_] ||= {})[index_]
       tuple_hash_ ? tuple_hash_.values.map{ |objdata_| objdata_[0] } : []
     end
 
 
     def tuples_in_category(category_, index_)
-      catdata_ = @categories[category_]
-      return nil unless catdata_
-      tuple_hash_ = catdata_[2][index_]
+      @config.lock
+
+      return nil unless @categories.include?(category_)
+      tuple_hash_ = (@catdata[category_] ||= {})[index_]
       tuple_hash_ ? tuple_hash_.keys : []
     end
 
@@ -229,6 +234,8 @@ module IDRegistry
     # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
 
     def delete(arg_)
+      @config.lock
+
       @mutex.synchronize do
         if (objdata_ = _get_objdata(arg_))
           @objects.delete(objdata_[0].object_id)
@@ -242,6 +249,8 @@ module IDRegistry
     # Delete all objects with a tuple matching the given pattern.
 
     def delete_pattern(pattern_)
+      @config.lock
+
       @mutex.synchronize do
         tuples_ = @tuples.keys.find_all{ |tuple_| Utils.matches?(pattern_, tuple_) }
         tuples_.each do |tuple_|
@@ -266,6 +275,8 @@ module IDRegistry
     # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
 
     def rekey(arg_)
+      @config.lock
+
       # Resolve the object.
       if (objdata_ = _get_objdata(arg_))
 
@@ -303,11 +314,11 @@ module IDRegistry
               end
             end
             # Now go through and edit the tuples
-            new_tuple_list_.each do |tup_|
-              _add_tuple(objdata_, tup_)
-            end
             (tuple_hash_.keys - new_tuple_list_).each do |tup_|
               _remove_tuple(objdata_, tup_)
+            end
+            new_tuple_list_.each do |tup_|
+              _add_tuple(objdata_, tup_)
             end
           end
         end
@@ -322,7 +333,7 @@ module IDRegistry
       @mutex.synchronize do
         @tuples.clear
         @objects.clear
-        @categories.each{ |k_, v_| v_[2].clear }
+        @catdata.clear
       end
       self
     end
@@ -393,6 +404,7 @@ module IDRegistry
         if objdata_[1] != type_
           raise ObjectKeyError, "Object is already present with type #{objdata_[1]}"
         end
+        true
       else
         # Object is not present.
         # Generate list of tuples to add, and make sure they are unique.
@@ -407,6 +419,7 @@ module IDRegistry
             end
           end
         end
+        return false if tuple_list_.size == 0
 
         # Insert the object. This is the actual mutation.
         objdata_ = [obj_, type_, {}]
@@ -414,6 +427,7 @@ module IDRegistry
         tuple_list_.each do |tup_|
           _add_tuple(objdata_, tup_) if tup_
         end
+        true
       end
     end
     private :_internal_add
@@ -428,7 +442,7 @@ module IDRegistry
       @categories.each do |category_, catdata_|
         if Utils.matches?(catdata_[0], tuple_)
           index_ = catdata_[1].map{ |i_| tuple_[i_] }
-          (catdata_[2][index_] ||= {})[tuple_] = objdata_
+          ((@catdata[category_] ||= {})[index_] ||= {})[tuple_] = objdata_
           tupcats_ << category_
         end
       end
@@ -445,9 +459,8 @@ module IDRegistry
       return false unless tupcats_
       @tuples.delete(tuple_)
       tupcats_.each do |cat_|
-        catdata_ = @categories[cat_]
-        index_ = catdata_[1].map{ |i_| tuple_[i_] }
-        catdata_[2][index_].delete(tuple_)
+        index_ = @categories[cat_][1].map{ |i_| tuple_[i_] }
+        @catdata[cat_][index_].delete(tuple_)
       end
       objdata_[2].delete(tuple_)
       true
