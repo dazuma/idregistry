@@ -56,6 +56,9 @@ module ObjectRegistry
     dsl_methods false
 
 
+    # Object types that aren't explicitly provided will be assigned
+    # anonymous types that are instances of this class.
+
     class AnonymousType; end
 
 
