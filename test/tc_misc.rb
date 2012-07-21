@@ -35,10 +35,10 @@
 
 
 require 'test/unit'
-require 'objectregistry'
+require 'idregistry'
 
 
-module ObjectRegistry
+module IDRegistry
   module Tests  # :nodoc:
 
     class TestMisc < ::Test::Unit::TestCase  # :nodoc:

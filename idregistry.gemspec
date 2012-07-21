@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry exceptions
+# IDRegistry gemspec
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,31 +34,21 @@
 ;
 
 
-module ObjectRegistry
-
-
-  class ObjectRegistryError < ::StandardError
-  end
-
-
-  # Raised if you attempt to modify the configuration of a registry for which
-  # the configuration has been locked because you've started to add data.
-
-  class ConfigurationLockedError < ObjectRegistryError
-  end
-
-
-  # Raised if you attempt to make an illegal modification to a configuration.
-
-  class IllegalConfigurationError < ObjectRegistryError
-  end
-
-
-  # Raised if you attempt to add a nil object to the registry, or if you
-  # add an object that is already present under a different tuple or type.
-
-  class ObjectKeyError < ObjectRegistryError
-  end
-
-
+::Gem::Specification.new do |s_|
+  s_.name = 'idregistry'
+  s_.summary = 'IDRegistry is a generic object generator and identity map for Ruby.'
+  s_.description = "IDRegistry is a generic object generator and identity map for Ruby."
+  s_.version = "#{::File.read('Version').strip}.nonrelease"
+  s_.author = 'Daniel Azuma'
+  s_.email = 'dazuma@gmail.com'
+  s_.homepage = 'http://github.com/dazuma/idregistry'
+  s_.rubyforge_project = 'virtuoso'
+  s_.required_ruby_version = '>= 1.8.7'
+  s_.files = ::Dir.glob("lib/**/*.rb") +
+    ::Dir.glob("test/**/*.rb") +
+    ::Dir.glob("*.rdoc") +
+    ['Version']
+  s_.extra_rdoc_files = ::Dir.glob("*.rdoc")
+  s_.test_files = ::Dir.glob("test/**/tc_*.rb")
+  s_.platform = ::Gem::Platform::RUBY
 end

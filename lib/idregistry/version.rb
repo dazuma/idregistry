@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry railtie
+# IDRegistry version
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,58 +34,20 @@
 ;
 
 
-require 'objectregistry'
-require 'rails/railtie'
+begin
+  require 'versionomy'
+rescue ::LoadError
+end
 
 
-module ObjectRegistry
+module IDRegistry
 
+  # Current version of IDRegistry as a frozen string
+  VERSION_STRING = ::File.read(::File.dirname(__FILE__)+'/../../Version').strip.freeze
 
-  # This railtie installs a middleware that clears out registries on
-  # each request. Use the configuration to specify which registries.
-  #
-  # To install into a Rails app, include this line in your
-  # config/application.rb:
-  #   require 'objectregistry/railtie'
-  # It should appear before your application configuration.
-  #
-  # You can then configure it using the standard rails configuration
-  # mechanism. The configuration lives in the config.objectregistry
-  # configuration namespace. See ObjectRegistry::Railtie::Configuration for
-  # the configuration options.
-
-  class Railtie < ::Rails::Railtie
-
-
-    # Configuration options. These are attributes of config.objectregistry.
-
-    class Configuration
-
-      def initialize  # :nodoc:
-        @repos = []
-      end
-
-      def add_repository(*repos_, &block_)
-        repos_.flatten!
-        opts_ = repos_.last.is_a?(::Hash) ? repos_.pop.dup : {}
-        opts_[:repos] = repos_
-        opts_[:block] = block_
-        @repos << opts_
-      end
-
-    end
-
-
-    config.objectregistry = Configuration.new
-
-
-    initializer :initialize_objectregistry do |app_|
-      repos_ = app_.config.objectregistry.instance_variable_get(:@repos)
-      app_.config.middleware.use(RegistryCleanerMiddleware, repos_)
-    end
-
-
-  end
-
+  # Current version of IDRegistry as a Versionomy object, if the
+  # Versionomy gem is available. Otherwise, the same string value as
+  # VERSION_STRING.
+  VERSION = defined?(::Versionomy) ? ::Versionomy.parse(VERSION_STRING) : VERSION_STRING
 
 end

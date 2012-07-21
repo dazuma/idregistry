@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry version
+# IDRegistry utilities
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,20 +34,31 @@
 ;
 
 
-begin
-  require 'versionomy'
-rescue ::LoadError
-end
+module IDRegistry
 
 
-module ObjectRegistry
+  # A set of general utility methods for the implementation.
+  # Clients may also have occasion to use these methods.
 
-  # Current version of ObjectRegistry as a frozen string
-  VERSION_STRING = ::File.read(::File.dirname(__FILE__)+'/../../Version').strip.freeze
+  class Utils
 
-  # Current version of ObjectRegistry as a Versionomy object, if the
-  # Versionomy gem is available. Otherwise, the same string value as
-  # VERSION_STRING.
-  VERSION = defined?(::Versionomy) ? ::Versionomy.parse(VERSION_STRING) : VERSION_STRING
+    class << self
+
+
+      # Returns true if the given pattern is matched by the given tuple.
+
+      def matches?(pattern_, tuple_)
+        return false unless pattern_.size == tuple_.size
+        tuple_.each_with_index do |tuple_elem_, index_|
+          return false unless pattern_[index_] === tuple_elem_
+        end
+        return true
+      end
+
+
+    end
+
+  end
+
 
 end

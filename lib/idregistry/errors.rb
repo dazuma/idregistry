@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry utilities
+# IDRegistry exceptions
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,30 +34,30 @@
 ;
 
 
-module ObjectRegistry
+module IDRegistry
 
 
-  # A set of general utility methods for the implementation.
-  # Clients may also have occasion to use these methods.
-
-  class Utils
-
-    class << self
+  class IDRegistryError < ::StandardError
+  end
 
 
-      # Returns true if the given pattern is matched by the given tuple.
+  # Raised if you attempt to modify the configuration of a registry for which
+  # the configuration has been locked because you've started to add data.
 
-      def matches?(pattern_, tuple_)
-        return false unless pattern_.size == tuple_.size
-        tuple_.each_with_index do |tuple_elem_, index_|
-          return false unless pattern_[index_] === tuple_elem_
-        end
-        return true
-      end
+  class ConfigurationLockedError < IDRegistryError
+  end
 
 
-    end
+  # Raised if you attempt to make an illegal modification to a configuration.
 
+  class IllegalConfigurationError < IDRegistryError
+  end
+
+
+  # Raised if you attempt to add a nil object to the registry, or if you
+  # add an object that is already present under a different tuple or type.
+
+  class ObjectKeyError < IDRegistryError
   end
 
 

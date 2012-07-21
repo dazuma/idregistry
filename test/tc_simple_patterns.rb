@@ -35,11 +35,11 @@
 
 
 require 'test/unit'
-require 'objectregistry'
+require 'idregistry'
 require 'set'
 
 
-module ObjectRegistry
+module IDRegistry
   module Tests  # :nodoc:
 
     class TestSimplePatterns < ::Test::Unit::TestCase  # :nodoc:
@@ -49,7 +49,7 @@ module ObjectRegistry
 
 
       def setup
-        @registry = ObjectRegistry.create
+        @registry = IDRegistry.create
         @registry.config do
           add_pattern do
             pattern [:hello, ::Integer]

@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry registry object
+# IDRegistry registry object
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,7 +34,7 @@
 ;
 
 
-module ObjectRegistry
+module IDRegistry
 
 
   # A registry object.

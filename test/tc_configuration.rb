@@ -35,11 +35,11 @@
 
 
 require 'test/unit'
-require 'objectregistry'
+require 'idregistry'
 require 'set'
 
 
-module ObjectRegistry
+module IDRegistry
   module Tests  # :nodoc:
 
     class TestConfiguration < ::Test::Unit::TestCase  # :nodoc:
@@ -50,7 +50,7 @@ module ObjectRegistry
 
 
       def setup
-        @config = ObjectRegistry.create.config
+        @config = IDRegistry.create.config
       end
 
 

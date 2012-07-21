@@ -1,13 +1,13 @@
-== ObjectRegistry
+== IDRegistry
 
-ObjectRegistry is a generic object generator and identity map for Ruby.
+IDRegistry is a generic object generator and identity map for Ruby.
 
 === Summary
 
 
 === Dependencies
 
-ObjectRegistry is known to work with the following Ruby implementations:
+IDRegistry is known to work with the following Ruby implementations:
 
 * Standard "MRI" Ruby 1.8.7 or later. (1.9.2 or later preferred.)
 * Rubinius 1.1 or later.
@@ -15,27 +15,27 @@ ObjectRegistry is known to work with the following Ruby implementations:
 
 === Installation
 
-Install ObjectRegistry as a gem:
+Install IDRegistry as a gem:
 
- gem install objectregistry
+ gem install idregistry
 
 === Development and support
 
-Documentation is available at http://dazuma.github.com/objectregistry/rdoc
+Documentation is available at http://dazuma.github.com/idregistry/rdoc
 
-Source code is hosted on Github at http://github.com/dazuma/objectregistry
+Source code is hosted on Github at http://github.com/dazuma/idregistry
 
 Contributions are welcome. Fork the project on Github.
 
-Build status: {<img src="https://secure.travis-ci.org/dazuma/objectregistry.png" />}[http://travis-ci.org/dazuma/objectregistry]
+Build status: {<img src="https://secure.travis-ci.org/dazuma/idregistry.png" />}[http://travis-ci.org/dazuma/idregistry]
 
-Report bugs on Github issues at http://github.org/dazuma/objectregistry/issues
+Report bugs on Github issues at http://github.org/dazuma/idregistry/issues
 
 Contact the author at dazuma at gmail dot com.
 
 === Acknowledgments
 
-ObjectRegistry is written by Daniel Azuma (http://www.daniel-azuma.com).
+IDRegistry is written by Daniel Azuma (http://www.daniel-azuma.com).
 
 Development is supported by Pirq (http://www.pirq.com).
 

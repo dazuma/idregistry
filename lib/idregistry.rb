@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry middleware
+# IDRegistry main file
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,48 +34,15 @@
 ;
 
 
-module ObjectRegistry
+# IDRegistry is a generic object generator and identity map for Ruby.
 
-
-  # A Rack middleware that cleans up a registry after a request
-  # has completed.
-
-  class RegistryCleanerMiddleware
-
-
-    # Create a middleware object for Rack.
-
-    def initialize(app_, repos_=[], opts_={})
-      @app = app_
-      @repos = repos_
-    end
-
-
-    def call(env_)
-      begin
-        @repos.each do |repo_data_|
-          if repo_data_[:before_request]
-            block_ = repo_data_[:block]
-            if !block_ || block_.call(env_)
-              repo_data_[:repos].each{ |repo_| repo_.clear }
-            end
-          end
-        end
-        return @app.call(env_)
-      ensure
-        @repos.each do |repo_data_|
-          unless repo_data_[:before_request]
-            block_ = repo_data_[:block]
-            if !block_ || block_.call(env_)
-              repo_data_[:repos].each{ |repo_| repo_.clear }
-            end
-          end
-        end
-      end
-    end
-
-
-  end
-
-
+module IDRegistry
 end
+
+
+require 'idregistry/version'
+require 'idregistry/utils'
+require 'idregistry/errors'
+require 'idregistry/configuration'
+require 'idregistry/registry'
+require 'idregistry/middleware'

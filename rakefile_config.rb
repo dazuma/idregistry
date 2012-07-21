@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry Rakefile configuration
+# IDRegistry Rakefile configuration
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,5 +34,5 @@
 ;
 
 RAKEFILE_CONFIG = {
-  :product_visible_name => 'ObjectRegistry',
+  :product_visible_name => 'IDRegistry',
 }

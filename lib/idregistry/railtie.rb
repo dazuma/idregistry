@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry gemspec
+# IDRegistry railtie
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -34,21 +34,58 @@
 ;
 
 
-::Gem::Specification.new do |s_|
-  s_.name = 'objectregistry'
-  s_.summary = 'ObjectRegistry is a generic object generator and identity map for Ruby.'
-  s_.description = "ObjectRegistry is a generic object generator and identity map for Ruby."
-  s_.version = "#{::File.read('Version').strip}.nonrelease"
-  s_.author = 'Daniel Azuma'
-  s_.email = 'dazuma@gmail.com'
-  s_.homepage = 'http://github.com/dazuma/objectregistry'
-  s_.rubyforge_project = 'virtuoso'
-  s_.required_ruby_version = '>= 1.8.7'
-  s_.files = ::Dir.glob("lib/**/*.rb") +
-    ::Dir.glob("test/**/*.rb") +
-    ::Dir.glob("*.rdoc") +
-    ['Version']
-  s_.extra_rdoc_files = ::Dir.glob("*.rdoc")
-  s_.test_files = ::Dir.glob("test/**/tc_*.rb")
-  s_.platform = ::Gem::Platform::RUBY
+require 'idregistry'
+require 'rails/railtie'
+
+
+module IDRegistry
+
+
+  # This railtie installs a middleware that clears out registries on
+  # each request. Use the configuration to specify which registries.
+  #
+  # To install into a Rails app, include this line in your
+  # config/application.rb:
+  #   require 'idregistry/railtie'
+  # It should appear before your application configuration.
+  #
+  # You can then configure it using the standard rails configuration
+  # mechanism. The configuration lives in the config.idregistry
+  # configuration namespace. See IDRegistry::Railtie::Configuration for
+  # the configuration options.
+
+  class Railtie < ::Rails::Railtie
+
+
+    # Configuration options. These are attributes of config.idregistry.
+
+    class Configuration
+
+      def initialize  # :nodoc:
+        @repos = []
+      end
+
+      def add_repository(*repos_, &block_)
+        repos_.flatten!
+        opts_ = repos_.last.is_a?(::Hash) ? repos_.pop.dup : {}
+        opts_[:repos] = repos_
+        opts_[:block] = block_
+        @repos << opts_
+      end
+
+    end
+
+
+    config.idregistry = Configuration.new
+
+
+    initializer :initialize_idregistry do |app_|
+      repos_ = app_.config.idregistry.instance_variable_get(:@repos)
+      app_.config.middleware.use(RegistryCleanerMiddleware, repos_)
+    end
+
+
+  end
+
+
 end

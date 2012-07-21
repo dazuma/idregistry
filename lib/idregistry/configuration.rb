@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# ObjectRegistry configuration object
+# IDRegistry configuration object
 #
 # -----------------------------------------------------------------------------
 # Copyright 2012 Daniel Azuma
@@ -37,7 +37,7 @@
 require 'blockenspiel'
 
 
-module ObjectRegistry
+module IDRegistry
 
 
   # A registry configuration.
