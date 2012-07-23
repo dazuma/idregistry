@@ -94,13 +94,13 @@ module IDRegistry
       def initialize(template_, envkey_, &condition_)
         @condition = condition_
         @template = template_
-        @envkey_ = envkey_
-        @registry =  = nil
+        @envkey = envkey_
+        @registry = nil
       end
 
       def pre(env_)
         if !@condition || @condition.call(env_)
-          @registry = env_[envkey_] = @template.spawn_registry
+          @registry = env_[@envkey] = @template.spawn_registry
         end
       end
 
