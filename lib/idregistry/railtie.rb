@@ -41,8 +41,9 @@ require 'rails/railtie'
 module IDRegistry
 
 
-  # This railtie installs a middleware that clears out registries on
-  # each request. Use the configuration to specify which registries.
+  # This railtie installs and configures a middleware that helps you
+  # manage registries around Rails requests. See RegistryMiddleware for
+  # details.
   #
   # To install into a Rails app, include this line in your
   # config/application.rb:
@@ -57,21 +58,52 @@ module IDRegistry
   class Railtie < ::Rails::Railtie
 
 
-    # Configuration options. These are attributes of config.idregistry.
+    # Configuration options. These are methods on config.idregistry.
 
     class Configuration
 
       def initialize  # :nodoc:
-        @repos = []
+        @tasks = []
+        @after_middleware = nil
       end
 
-      def add_repository(*repos_, &block_)
-        repos_.flatten!
-        opts_ = repos_.last.is_a?(::Hash) ? repos_.pop.dup : {}
-        opts_[:repos] = repos_
-        opts_[:block] = block_
-        @repos << opts_
+
+      # Array of registry tasks
+      attr_accessor :tasks
+
+      # Middleware to run before, or nil to run the middleware toward the end
+      attr_accessor :before_middleware
+
+
+      # Set up the middleware to clear the given registry after each
+      # request.
+      #
+      # If you provide the optional block, it is called and passed the
+      # Rack environment. The registry is cleared only if the block
+      # returns a true value. If no block is provided, the registry is
+      # always cleared at the end of a request.
+
+      def clear_registry(reg_, &condition_)
+        @tasks << RegistryMiddleware::ClearRegistry.new(reg_, &condition_)
+        self
       end
+
+
+      # Set up the middleware to spawn a new registry on each request,
+      # using the given locked configuration as a template. The new
+      # registry is stored in the Rack environment with the given key.
+      # It is cleaned and disposed at the end of the request.
+      #
+      # If you provide the optional block, it is called and passed the
+      # Rack environment. A registry is spawned only if the block returns
+      # a true value. If no block is provided, a registry is always
+      # spawned.
+
+      def spawn_registry(template_, envkey_, &condition_)
+        @tasks << RegistryMiddleware::SpawnRegistry.new(template_, envkey_, &condition_)
+        self
+      end
+
 
     end
 
@@ -80,8 +112,13 @@ module IDRegistry
 
 
     initializer :initialize_idregistry do |app_|
-      repos_ = app_.config.idregistry.instance_variable_get(:@repos)
-      app_.config.middleware.use(RegistryCleanerMiddleware, repos_)
+      config_ = app_.config.idregistry
+      stack_ = app_.config.middleware
+      if (before_ = config_.before_middleware)
+        stack_.insert_before(before_, RegistryMiddleware, config_.tasks)
+      else
+        stack_.use(RegistryMiddleware, config_.tasks)
+      end
     end
 
 

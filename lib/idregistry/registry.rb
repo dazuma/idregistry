@@ -60,7 +60,10 @@ module IDRegistry
     end
 
 
-    # Get the configuration for this registry
+    # Get the configuration for this registry.
+    #
+    # You may also configure this registry by providing a block.
+    # The configuration object will then be available as a DSL.
 
     def config(&block_)
       ::Blockenspiel.invoke(block_, @config) if block_

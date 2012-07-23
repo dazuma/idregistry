@@ -37,40 +37,101 @@
 module IDRegistry
 
 
-  # A Rack middleware that cleans up a registry after a request
-  # has completed.
+  # A Rack middleware that manages registries around a request.
+  #
+  # Configure this middleware with a set of registry-related tasks,
+  # such as creating temporary registries scoped to the request, or
+  # clearing registries at the end of the request.
+  #
+  # A task object must include two methods: pre and post.
+  # These methods are called before and after the request, and are
+  # passed the Rack environment hash.
 
-  class RegistryCleanerMiddleware
+  class RegistryMiddleware
 
 
-    # Create a middleware object for Rack.
+    # A registry task that clears a registry at the end of a request.
+    #
+    # You may also provide an optional condition block, which is called
+    # and passed the Rack env to determine whether the registry should
+    # be cleared. If no condition block is provided, the registry is
+    # always cleared.
 
-    def initialize(app_, repos_=[], opts_={})
-      @app = app_
-      @repos = repos_
+    class ClearRegistry
+
+      def initialize(registry_, &condition_)
+        @condition = condition_
+        @registry = registry_
+      end
+
+      def pre(env_)
+      end
+
+      def post(env_)
+        if !@condition || @condition.call(env_)
+          @registry.clear
+        end
+      end
+
     end
 
 
+    # A registry task that spawns a registry scoped to this request.
+    #
+    # You must provide a locked registry configuration to use as a
+    # template. The spawned registry will use the given configuration.
+    # You must also provide a key, which will be used to store the
+    # spawned registry in the Rack environment so that your application
+    # can access it.
+    #
+    # You may also provide an optional condition block, which is called
+    # and passed the Rack env to determine whether a registry should
+    # be spawned. If no condition block is provided, a registry is
+    # always spawned.
+
+    class SpawnRegistry
+
+      def initialize(template_, envkey_, &condition_)
+        @condition = condition_
+        @template = template_
+        @envkey_ = envkey_
+        @registry =  = nil
+      end
+
+      def pre(env_)
+        if !@condition || @condition.call(env_)
+          @registry = env_[envkey_] = @template.spawn_registry
+        end
+      end
+
+      def post(env_)
+        if @registry
+          @registry.clear
+          @registry = nil
+        end
+      end
+
+    end
+
+
+    # Create a middleware.
+    #
+    # After the required Rack app argument, provide an array of tasks.
+
+    def initialize(app_, tasks_=[], opts_={})
+      @app = app_
+      @tasks = tasks_
+    end
+
+
+    # Wrap the Rack app with registry tasks.
+
     def call(env_)
       begin
-        @repos.each do |repo_data_|
-          if repo_data_[:before_request]
-            block_ = repo_data_[:block]
-            if !block_ || block_.call(env_)
-              repo_data_[:repos].each{ |repo_| repo_.clear }
-            end
-          end
-        end
+        @tasks.each{ |task_| task_.pre(env_) }
         return @app.call(env_)
       ensure
-        @repos.each do |repo_data_|
-          unless repo_data_[:before_request]
-            block_ = repo_data_[:block]
-            if !block_ || block_.call(env_)
-              repo_data_[:repos].each{ |repo_| repo_.clear }
-            end
-          end
-        end
+        @tasks.each{ |task_| task_.post(env_) }
       end
     end
 

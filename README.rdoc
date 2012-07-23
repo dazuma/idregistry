@@ -2,8 +2,132 @@
 
 IDRegistry is a generic object generator and identity map for Ruby.
 
-=== Summary
+=== Introduction to IDRegistry
 
+An IDRegistry is a hub for obtaining and managing domain objects in a
+Ruby application. It is a configurable general registry for identifying
+and constructing objects when needed, and it includes a built-in identity
+map which caches objects in memory and prevents duplicates.
+
+==== An Example
+
+That's a lot of jargon, so let's clarify with an example. Suppose you
+are writing a Ruby application in which you have user objects and blog
+post objects, each identified by an ID number (which might be the
+primary key in a database.) In effect, you can uniquely identify any of
+these domain objects by a two-element tuple (array), [type, id], where the
+type is one of the symbols <tt>:user</tt> or <tt>:post</tt>, and the id
+is an integer.
+
+An IDRegistry is a central object that lets you obtain any of your
+domain objects by giving it that unique identifying tuple.
+
+ # Get the user with ID 1
+ first_user = registry.lookup([:user, 1])
+ 
+ # Get the user with ID 2
+ second_user = registry.lookup([:user, 2])
+ 
+ # Get the blog post with ID 300
+ post = registry.lookup([:post, 300])
+
+==== Configuration
+
+How does IDRegistry know how to construct your user and post objects?
+At initialization time, you configure IDRegistry, telling it about each
+type of object it will need to manage. For each object type, you provide
+a pattern for the identifying tuple, and a block that constructs a new
+object when needed. Here's an example:
+
+ # Configure the registry at initialization time
+ registry.config do
+ 
+   # The pattern for identifying tuples for user objects
+   add_pattern([:user, Integer]) do
+ 
+     # How to construct a user object given a tuple
+     to_generate_object do |tuple|
+       # The second element of the tuple is the integer ID
+       my_construct_user_object_from_id(tuple[1])
+     end
+ 
+   end
+ 
+   # The pattern for identifying tuples for post objects
+   add_pattern([:post, Integer]) do
+ 
+     # How to construct a post object given a tuple
+     to_generate_object do |tuple|
+       # The second element of the tuple is the integer ID
+       my_construct_post_object_from_id(tuple[1])
+     end
+ 
+   end
+ 
+ end
+
+Now, when you ask for a particular tuple, say, [:user, 1], the
+IDRegistry finds the pattern that matches that tuple, and uses it to
+construct and return the appropriate object.
+
+==== Caching
+
+The real power, however, comes from the fact that IDRegistry now
+caches all the objects it creates in an internal hash. So if you ask
+for the same tuple identifier a second time, it doesn't construct a
+second object, but simply returns the same object it had constructed
+earlier. In other words, it has a built-in identity map.
+
+ # Get the user with ID 1
+ first_user = registry.lookup([:user, 1])
+ 
+ # If you re-ask for the same identifier, you get the same object.
+ same_user = registry.lookup([:user, 1])
+ 
+ same_user.object_id == first_user.object_id  # => true
+
+You can remove cached objects from the registry, forcing the registry
+to re-construct them the next time you ask for them. A common usage
+pattern in a web application is to clear out the registry cache at the
+end of each request, so that each request is self-contained and has its
+own copies of domain objects. A Rack middleware is provided for this
+purpose.
+
+==== Tuples
+
+Identifying tuples don't have to follow the pattern [type, id]. They
+can actually be any array. For example, you might want to identify
+nodes in a tree using a combination of parent and child name, rather
+than just the ID. For such tree node objects, you might use a pattern
+like <tt>[:tree, Node, String]</tt>, where the second element is
+the parent node itself, and the third is the name of the child.
+
+In fact, it is even possible to provide multiple ways of identifying
+objects. Perhaps you want to be able to look up tree nodes by either
+ID number, or by parent/child-name. In configuration, you can tell
+IDRegistry that these refer to the same type of object. Then, if you
+first look up an object by ID, and then later look up the same object
+by parent/child-name, IDRegistry will be smart enough to know you are
+referring to the same object, and will return its cached data.
+
+==== Why?
+
+IDRegistry is an extraction of an identity map I wrote for a few large
+Rails applications, including the back-end for Pirq (www.pirq.com).
+
+Our model objects were getting quite complex with lots of associations
+and dependencies, and we were having difficulty keeping track of which
+objects had already been loaded, and whether we had multiple copies of
+objects in memory that might be getting out of sync with one another.
+
+After we wrote IDRegistry and refactored our object creation to use it,
+our domain object management code was greatly simplified, and a whole
+class of bugs was eliminated. We've been using it in production for
+several years, and now we offer it to the community.
+
+==== For more info
+
+More detailed info is available in the IDRegistry.rdoc file.
 
 === Dependencies
 
