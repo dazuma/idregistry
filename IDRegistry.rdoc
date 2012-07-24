@@ -12,7 +12,7 @@ An Identity Map is essentially an in-memory cache that references objects based 
 
 In addition to the performance benefits of a cache, an Identity Map also ensures that at most one copy of any object will exist in your system at any time. This effectively eliminates a whole class of bugs that could arise if you construct multiple copies of an object whose states get out of sync with each other.
 
-Identity Map is a highly useful pattern, but by itself it tends to be cumbersome to implement. This is because you have to find every point in the code that constructs a model object, and inject the cache ceremony: checking the cache prior to constructing the object, and inserting the object afterward. To solve this, we combine it with the Registry pattern. A Registry is simply a central source for object procurement; any code that wants to obtain a model object must get it from the Registry. The Registry knows how to construct the object if needed. Thus, it is able to encapsulate the Identity Map logic, providing a one-stop solution for object procurement with caching and duplication elimination. This combination is what we call an IDRegistry.
+Identity Map is a highly useful pattern, but by itself it tends to be cumbersome to implement. This is because you have to find every point in the code that constructs a model object, and inject some code to manage the cache. To solve this, we combine it with the Registry pattern. A Registry is simply a central source for object procurement; any code that wants to obtain a model object must get it from the Registry. The Registry knows how to construct the object if needed. Thus, it is able to encapsulate the Identity Map logic, providing a one-stop solution for object procurement with caching and duplication elimination. This combination is what we call an IDRegistry.
 
 == Tuples and Patterns
 
@@ -40,8 +40,11 @@ The job of an IDRegistry is to procure objects by either returning a cached obje
 
 In the previous section, we saw how a "type" of object can be identified with a <i>pattern</i>. Through configuration, we "teach" an IDRegistry how to construct objects for a given pattern. For example, our user objects have identifiers matching the pattern <tt>[:user, Integer]</tt>. We can configure a registry as follows:
 
- my_registry.config.add_pattern([:user, Integer]) do |tuple|
-   my_create_user_object_given_id(tuple[1])
+ my_registry.config.add_pattern
+   pattern [:user, Integer]
+   to_generate_object do |tuple|
+     my_create_user_object_given_id(tuple[1])
+   end
  end
 
 The <tt>add_pattern</tt> configuration command teaches the IDRegistry about a certain pattern. If the registry encounters a tuple identifier matching that pattern, it specifies how to construct the object given that tuple.
@@ -59,12 +62,61 @@ If you want to clear the cache and force the registry to construct new objects, 
 
 == Multiple identifiers for an object
 
-(...to be written...)
+Sometimes there will be several different mechanisms for identifying an object to procure. Consider a tree stored in the database. Each node might have a database primary key, so you could identify objects using the pattern <tt>[:node, Integer]</tt>. However, you might also want to navigate from parent to child by child name, using a pattern such as <tt>[:node, Integer, String]</tt> similar to the tree example we covered earlier. That is, conceptually, we might want to have these two ways of obtaining an object in the tree:
+
+ object = find_tree_node_id(id)
+ object = find_tree_from_parent_id_and_child_name(parent_id, child_name)
+
+These two ways to lookup the object correspond to two different tuples---two different unique identifiers. In a simple Identity Map, this would not work. It might create an object using the first identifier, and then create a second object using the second identifier, even if semantically they should be the same object.
+
+IDRegistry, however, supports this case by giving you the ability to connect multiple patterns and associate them with the same object type. Here's how.
+
+ my_registry.config do
+   add_pattern do
+     type :tree
+     pattern [:tree, Integer]
+     to_generate_object do |tuple|
+       find_tree_node_id(tuple[1])
+     end
+     to_generate_tuple do |obj|
+       [:user, obj.id]
+     end
+   end
+   add_pattern do
+     type :tree
+     pattern [:tree, Integer, String]
+     to_generate_object do |tuple|
+       find_tree_from_parent_id_and_child_name(tuple[1], tuple[2])
+     end
+     to_generate_tuple do |obj|
+       [:user, obj.parent_id, obj.name]
+     end
+   end
+ end
+
+Let's unpack this. First, notice that we are now specifying a "type" for each pattern. The type is a name for this type of object. If you omit it (as we did earlier), IDRegistry automatically generates an anonymous type for each pattern that you add. In this case, however, we set it explicitly. This lets us specify that both patterns describe tree node objects. Each tree note will now have TWO identifiers, one of each pattern. So doing a lookup for either pattern will return the same object.
+
+Second, now in addition to the <tt>to_generate_object</tt> block, we now provide a <tt>to_generate_tuple</tt> block. We need to tell IDRegistry how to generate a tuple (identifier) from an object. Why?
+
+Well, suppose were were to look up a tree node by ID:
+
+ node = my_registry.lookup(:tree, 10)
+
+At this point, IDRegistry can cache the object and associate it with the tuple <tt>[:tree, 1]</tt> so that you can look it up using that tuple again. It also knows that the object can have a tuple with the pattern <tt>[:tree, Integer, String]</tt>, but it doesn't know what that tuple actually is. It needs for you to provide a way to generate that other tuple. Similarly, if you originally looked up the tree node by parent ID and name, IDRegistry needs you to teach it how to generate the corresponding simple ID tuple.
+
+ # Returns the same object as the original node
+ node1 = my_registry.lookup(:tree, node.parent_id, node.name)
+
+So to summarize... if you have only one way to look up an object, you can simply specify the pattern and a <tt>to_generate_object</tt> block. For objects that can be looked up in more than one way, you should also include a type, to connect the various patterns together, and a <tt>to_generate_tuple</tt> block which tells IDRegistry how to generate missing tuples, so that it can look up each object using every identifier pattern.
 
 == Scoping to jobs or web requests
 
 (...to be written...)
 
 == Categories
+
+(...to be written...)
+
+== Convenience methods
 
 (...to be written...)

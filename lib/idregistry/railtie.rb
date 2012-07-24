@@ -93,14 +93,9 @@ module IDRegistry
       # using the given locked configuration as a template. The new
       # registry is stored in the Rack environment with the given key.
       # It is cleaned and disposed at the end of the request.
-      #
-      # If you provide the optional block, it is called and passed the
-      # Rack environment. A registry is spawned only if the block returns
-      # a true value. If no block is provided, a registry is always
-      # spawned.
 
-      def spawn_registry(template_, envkey_, &condition_)
-        @tasks << RegistryMiddleware::SpawnRegistry.new(template_, envkey_, &condition_)
+      def spawn_registry(template_, envkey_)
+        @tasks << RegistryMiddleware::SpawnRegistry.new(template_, envkey_)
         self
       end
 
