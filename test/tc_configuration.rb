@@ -63,9 +63,11 @@ module IDRegistry
         assert_equal([], @config.all_patterns)
         assert_equal([], @config.all_types)
         assert_equal([], @config.all_categories)
+        assert_equal([], @config.all_convenience_methods)
         assert_equal(false, @config.has_pattern?([]))
         assert_equal(false, @config.has_type?(:type))
         assert_equal(false, @config.has_category?(:cat))
+        assert_equal(false, @config.has_convenience_method?(:get_hello))
       end
 
 
@@ -266,6 +268,38 @@ module IDRegistry
       end
 
 
+      def test_add_category
+        @config.add_category(:cat1, [:hello, ::Integer], [1])
+        assert_equal([:cat1], @config.all_categories)
+        assert_equal(true, @config.has_category?(:cat1))
+        assert_equal(false, @config.has_category?(:cat2))
+      end
+
+
+      def test_delete_category
+        @config.add_category(:cat1, [:hello, ::Integer], [1])
+        @config.delete_category(:cat1)
+        assert_equal([], @config.all_categories)
+        assert_equal(false, @config.has_category?(:cat1))
+      end
+
+
+      def test_add_convenience_method
+        @config.add_convenience_method(:get_hello, [:hello, ::Integer], [1])
+        assert_equal([:get_hello], @config.all_convenience_methods)
+        assert_equal(true, @config.has_convenience_method?(:get_hello))
+        assert_equal(false, @config.has_convenience_method?(:get_hello2))
+      end
+
+
+      def test_delete_convenience_method
+        @config.add_convenience_method(:get_hello, [:hello, ::Integer], [1])
+        @config.delete_convenience_method(:get_hello)
+        assert_equal([], @config.all_convenience_methods)
+        assert_equal(false, @config.has_convenience_method?(:get_hello))
+      end
+
+
       def test_clear
         @config.add_pattern([:hello, ::Integer], :hello_numbers,
           ::Proc.new{ |tuple_| Class1.new(tuple_[1]) },
@@ -276,13 +310,17 @@ module IDRegistry
         @config.add_pattern([:world, ::Float], :world_numbers,
           ::Proc.new{ |tuple_| Class1.new(tuple_[1].to_i) },
           ::Proc.new{ |obj_| [:world, obj_.value.to_f] })
+        @config.add_category(:cat, [:hello, ::Integer], [1])
+        @config.add_convenience_method(:get_hello, [:hello, ::Integer], [1])
         @config.clear
         assert_equal([], @config.all_patterns)
         assert_equal([], @config.all_types)
         assert_equal([], @config.all_categories)
+        assert_equal([], @config.all_convenience_methods)
         assert_equal(false, @config.has_pattern?([]))
-        assert_equal(false, @config.has_type?(:type))
+        assert_equal(false, @config.has_type?(:hello_numbers))
         assert_equal(false, @config.has_category?(:cat))
+        assert_equal(false, @config.has_convenience_method?(:get_hello))
       end
 
 

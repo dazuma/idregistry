@@ -279,17 +279,21 @@ module IDRegistry
     end
 
 
-    # Delete all objects with a tuple matching the given pattern.
+    # Delete all objects in a given category, which is specified by the
+    # category type and the index array indicating which category of that
+    # type.
 
-    def delete_pattern(pattern_)
+    def delete_category(category_, index_)
       @config.lock
 
-      @mutex.synchronize do
-        tuples_ = @tuples.keys.find_all{ |tuple_| Utils.matches?(pattern_, tuple_) }
-        tuples_.each do |tuple_|
-          objdata_ = @tuples[tuple_]
-          @objects.delete(objdata_[0].object_id)
-          objdata_[2].each_key{ |tup_| _remove_tuple(objdata_, tup_) }
+      if @categories.include?(category_)
+        if (tuple_hash_ = (@catdata[category_] ||= {})[index_])
+          @mutex.synchronize do
+            tuple_hash_.values.each do |objdata_|
+              @objects.delete(objdata_[0].object_id)
+              objdata_[2].each_key{ |tup_| _remove_tuple(objdata_, tup_) }
+            end
+          end
         end
       end
       self

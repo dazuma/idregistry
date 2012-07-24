@@ -88,37 +88,28 @@ module IDRegistry
     # You must also provide a key, which will be used to store the
     # spawned registry in the Rack environment so that your application
     # can access it.
-    #
-    # You may also provide an optional condition block, which is called
-    # and passed the Rack env to determine whether a registry should
-    # be spawned. If no condition block is provided, a registry is
-    # always spawned.
 
     class SpawnRegistry
 
       # Create a new ClearRegistry task. You must provide a locked
-      # template configuration, a key into the Rack environment, and
-      # an optional condition block.
-      def initialize(template_, envkey_, &condition_)
-        @condition = condition_
+      # template configuration and a key into the Rack environment.
+      def initialize(template_, envkey_)
         @template = template_
         @envkey = envkey_
         @registry = nil
       end
 
-      # The pre method for this task creates a new registry if the
-      # condition block passes.
+      # The pre method for this task creates a new registry.
       def pre(env_)
-        if !@condition || @condition.call(env_)
-          @registry = env_[@envkey] = @template.spawn_registry
-        end
+        @registry = env_[@envkey] = @template.spawn_registry
       end
 
-      # The post method for this task clears the new registry.
+      # The post method for this task clears the spawned registry.
       def post(env_)
         if @registry
           @registry.clear
           @registry = nil
+          env_.delete(@envkey)
         end
       end
 
