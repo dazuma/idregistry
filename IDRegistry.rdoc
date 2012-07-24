@@ -1,0 +1,70 @@
+= IDRegistry
+
+IDRegistry is a generic object generator and identity map for Ruby.
+
+This document provides an in-depth introduction to using IDRegistry. For a quick introduction, see the README.
+
+== Identity Maps and Registries
+
+IDRegistry combines two patterns from Martin Fowler's book "Patterns of Enterprise Application Architecture": the Identity Map pattern and the Registry pattern.
+
+An Identity Map is essentially an in-memory cache that references objects based on a unique identifier. Whenever you want to obtain an object, you first check the cache to see if the object already exists---technically, if the cache contains an object for the given unique identifier. If so, you pull that existing instance directly from the cache. Otherwise, you construct the object, making any necessary database calls, and then insert it into the cache. It has now effectively been memoized, and the next time you request that identifier, that same instance will be returned again from the cache.
+
+In addition to the performance benefits of a cache, an Identity Map also ensures that at most one copy of any object will exist in your system at any time. This effectively eliminates a whole class of bugs that could arise if you construct multiple copies of an object whose states get out of sync with each other.
+
+Identity Map is a highly useful pattern, but by itself it tends to be cumbersome to implement. This is because you have to find every point in the code that constructs a model object, and inject the cache ceremony: checking the cache prior to constructing the object, and inserting the object afterward. To solve this, we combine it with the Registry pattern. A Registry is simply a central source for object procurement; any code that wants to obtain a model object must get it from the Registry. The Registry knows how to construct the object if needed. Thus, it is able to encapsulate the Identity Map logic, providing a one-stop solution for object procurement with caching and duplication elimination. This combination is what we call an IDRegistry.
+
+== Tuples and Patterns
+
+A common practice is to use database primary keys as the unique identifiers for an Identity Map. However, if you are managing multiple kinds of objects, objects that span multiple tables or aren't associated with any particular database row, or objects that otherwise need to be identified across more than one dimension, you need a more versatile unique identifier.
+
+IDRegistry uses arrays, or <i>tuples</i> as we will call them, as unique identifiers. This allows us to support a wide variety of identification strategies. A simple example is to employ a two-element tuple: the first element being a type indicator, and the second being a database primary key. For example, suppose your application had two types of entities: users and blog posts. Your user objects could employ unique identifiers of the form <tt>[:user, <i>user-id</i>]</tt>, and your post objects could employ identifiers of the form <tt>[:post, <i>post-id</i>]</tt>. So the tuple <tt>[:user, 1]</tt> identifies the user with ID 1, and the tuple <tt>[:post, 210]</tt> identifies the post with ID 210.
+
+Such "forms" of tuples that correspond to "types" of objects, we denote as <i>patterns</i>. A pattern is an array like a tuple, but some of its elements are types rather than values. For example, <tt>[:user, 1]</tt> is a tuple that identifies the particular user with ID 1, while <tt>[:user, Integer]</tt> is the pattern followed by user identifiers. Similarly, <tt>[:post, Integer]</tt> is the pattern followed by blog post identifiers.
+
+Technically, in IDRegistry, a "type" element in a pattern can be any object that responds appropriately to the === operator. In most cases, these will be class or module objects (such as <tt>Integer</tt> above). However, patterns can utilize regular expressions, or any other object that classifies based on the === operator.
+
+Tuples (and patterns) can be longer and more complex than the two-element examples above. Here are a few more examples.
+
+Suppose you have a tree of node objects, each uniquely identified by a parent node and a child name. You might structure your identifiers according to the pattern <tt>[:tree, TreeNode, String]</tt>.
+
+Suppose you have objects that represent relationships between users in a social network. Each relationship would be identified by the user IDs of the two users involved. You might structure your identifiers according to the pattern <tt>[:relationship, Integer, Integer]</tt>. For this case, you might need to decide whether <tt>[:relationship, 1, 2]</tt> and <tt>[:relationship, 2, 1]</tt> should refer to the same or different objects in your application. If they should refer to the same object, you should pre-filter your tuples so that, for example, the first user ID is always the smaller.
+
+== Basic IDRegistry usage
+
+Creating an IDRegistry is as simple as calling the <tt>create</tt> method:
+
+ my_registry = IDRegistry.create
+
+The job of an IDRegistry is to procure objects by either returning a cached object or creating a new one. Thus, it needs to know how to construct your model objects. You accomplish this by configuring the registry at application initialization time, telling it how to construct the various types of objects it needs to manage.
+
+In the previous section, we saw how a "type" of object can be identified with a <i>pattern</i>. Through configuration, we "teach" an IDRegistry how to construct objects for a given pattern. For example, our user objects have identifiers matching the pattern <tt>[:user, Integer]</tt>. We can configure a registry as follows:
+
+ my_registry.config.add_pattern([:user, Integer]) do |tuple|
+   my_create_user_object_given_id(tuple[1])
+ end
+
+The <tt>add_pattern</tt> configuration command teaches the IDRegistry about a certain pattern. If the registry encounters a tuple identifier matching that pattern, it specifies how to construct the object given that tuple.
+
+You can add any number of pattern configurations to a registry, covering any number of object types.
+
+Once you have configured your IDRegistry, using it is simple. Call the <tt>lookup</tt> method to obtain an object given a tuple. The registry will check its cache and return the object, or it will invoke the matching pattern configuration to create it.
+
+ user1 = my_registry.lookup(:user, 1)   # constructs a user object
+ user1a = my_registry.lookup(:user, 1)  # returns the same user object
+
+If you want to clear the cache and force the registry to construct new objects, use the <tt>clear</tt> method:
+
+ my_registry.clear
+
+== Multiple identifiers for an object
+
+(...to be written...)
+
+== Scoping to jobs or web requests
+
+(...to be written...)
+
+== Categories
+
+(...to be written...)

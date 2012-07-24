@@ -106,7 +106,7 @@ module IDRegistry
       request_unlocked_ = opts_[:unlocked]
       if @locked && !request_unlocked_
         reg_ = Registry._new(@patterns, @types, @categories, @methods)
-        reg_.lock
+        reg_.config.lock
       else
         patterns_ = {}
         types_ = {}
@@ -117,7 +117,7 @@ module IDRegistry
         @categories.each{ |k_, v_| categories_[k_] = v_.dup }
         @methods.each{ |k_, v_| methods_[k_] = v_.dup }
         reg_ = Registry._new(patterns_, types_, categories_, methods_)
-        reg_.lock unless request_unlocked_
+        reg_.config.lock unless request_unlocked_
       end
       reg_
     end

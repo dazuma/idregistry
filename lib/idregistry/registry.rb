@@ -119,6 +119,19 @@ module IDRegistry
     end
 
 
+    # Return all the categories for the given object or tuple.
+    #
+    # If you pass an Array, it is interpreted as a tuple.
+    # If you pass something other than an Array or a Hash, it is
+    # interpreted as an object.
+    # Otherwise, you can explicitly specify whether you are passing
+    # a tuple or object by using hash named arguments, e.g.
+    # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
+    #
+    # The return value is a hash. The keys are the category types
+    # relevant to this object. The values are the index arrays
+    # indicating which category the object falls under for each type.
+
     def categories(arg_)
       @config.lock
 
@@ -134,6 +147,10 @@ module IDRegistry
     end
 
 
+    # Return all objects in a given category, which is specified by the
+    # category type and the index array indicating which category of that
+    # type.
+
     def objects_in_category(category_, index_)
       @config.lock
 
@@ -142,6 +159,10 @@ module IDRegistry
       tuple_hash_ ? tuple_hash_.values.map{ |objdata_| objdata_[0] } : []
     end
 
+
+    # Return all tuples in a given category, which is specified by the
+    # category type and the index array indicating which category of that
+    # type.
 
     def tuples_in_category(category_, index_)
       @config.lock
@@ -155,9 +176,18 @@ module IDRegistry
     # Get the object corresponding to the given tuple.
     # If the tuple is not present, the registry tries to generate the
     # object for you. Returns nil if it is unable to do so.
-    # The optional args parameter is passed to the object generator.
+    #
+    # You may pass the tuple as a single array argument, or as a set
+    # of arguments.
+    #
+    # If the last argument is a hash, it is removed from the tuple and
+    # treated as an options hash that may be passed to an object
+    # generator block.
 
-    def lookup(tuple_, args_={})
+    def lookup(*args_)
+      opts_ = args_.last.is_a?(::Hash) ? args_.pop : {}
+      tuple_ = args_.size == 1 && args_.first.is_a?(::Array) ? args_.first : args_
+
       @config.lock
 
       # Fast-track lookup if it's already there
@@ -177,7 +207,7 @@ module IDRegistry
             when 0 then block_.call
             when 1 then block_.call(tuple_)
             when 2 then block_.call(tuple_, self)
-            else block_.call(tuple_, self, args_)
+            else block_.call(tuple_, self, opts_)
           end
           unless obj_.nil?
             type_ = patdata_[0]
@@ -342,7 +372,9 @@ module IDRegistry
     end
 
 
-    def method_missing(name_, *args_)
+    # Implement convenience methods.
+
+    def method_missing(name_, *args_)  # :nodoc:
       if (method_info_ = @methods[name_])
         tuple_ = method_info_[0].dup
         indexes_ = method_info_[1]
@@ -375,6 +407,9 @@ module IDRegistry
       super
     end
 
+
+    # Internal method that gets an object data array given an object
+    # specification.
 
     def _get_objdata(arg_)  # :nodoc:
       case arg_
@@ -488,9 +523,14 @@ module IDRegistry
 
 
     # Create a new, empty registry with an empty configuration.
+    #
+    # If you pass a block, it will be used to configure the registry,
+    # as if you had passed it to the config method.
 
-    def create
-      Registry._new({}, {}, {}, {})
+    def create(&block_)
+      reg_ = Registry._new({}, {}, {}, {})
+      reg_.config(&block_) if block_
+      reg_
     end
 
 

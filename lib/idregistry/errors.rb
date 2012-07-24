@@ -37,6 +37,8 @@
 module IDRegistry
 
 
+  # Base class for IDRegistry exceptions
+
   class IDRegistryError < ::StandardError
   end
 

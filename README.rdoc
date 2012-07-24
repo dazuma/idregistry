@@ -1,15 +1,15 @@
-== IDRegistry
+= IDRegistry
 
 IDRegistry is a generic object generator and identity map for Ruby.
 
-=== Introduction to IDRegistry
+== Introduction to IDRegistry
 
 An IDRegistry is a hub for obtaining and managing domain objects in a
 Ruby application. It is a configurable general registry for identifying
 and constructing objects when needed, and it includes a built-in identity
 map which caches objects in memory and prevents duplicates.
 
-==== An Example
+=== An Example
 
 That's a lot of jargon, so let's clarify with an example. Suppose you
 are writing a Ruby application in which you have user objects and blog
@@ -23,15 +23,15 @@ An IDRegistry is a central object that lets you obtain any of your
 domain objects by giving it that unique identifying tuple.
 
  # Get the user with ID 1
- first_user = registry.lookup([:user, 1])
+ first_user = registry.lookup(:user, 1)
  
  # Get the user with ID 2
- second_user = registry.lookup([:user, 2])
+ second_user = registry.lookup(:user, 2)
  
  # Get the blog post with ID 300
- post = registry.lookup([:post, 300])
+ post = registry.lookup(:post, 300)
 
-==== Configuration
+=== Configuration
 
 How does IDRegistry know how to construct your user and post objects?
 At initialization time, you configure IDRegistry, telling it about each
@@ -39,8 +39,8 @@ type of object it will need to manage. For each object type, you provide
 a pattern for the identifying tuple, and a block that constructs a new
 object when needed. Here's an example:
 
- # Configure the registry at initialization time
- registry.config do
+ # Create and configure the registry at initialization time
+ registry = Registry.create do
  
    # The pattern for identifying tuples for user objects
    add_pattern([:user, Integer]) do
@@ -70,7 +70,7 @@ Now, when you ask for a particular tuple, say, [:user, 1], the
 IDRegistry finds the pattern that matches that tuple, and uses it to
 construct and return the appropriate object.
 
-==== Caching
+=== Caching
 
 The real power, however, comes from the fact that IDRegistry now
 caches all the objects it creates in an internal hash. So if you ask
@@ -79,11 +79,10 @@ second object, but simply returns the same object it had constructed
 earlier. In other words, it has a built-in identity map.
 
  # Get the user with ID 1
- first_user = registry.lookup([:user, 1])
+ first_user = registry.lookup(:user, 1)
  
  # If you re-ask for the same identifier, you get the same object.
- same_user = registry.lookup([:user, 1])
- 
+ same_user = registry.lookup(:user, 1)
  same_user.object_id == first_user.object_id  # => true
 
 You can remove cached objects from the registry, forcing the registry
@@ -93,7 +92,7 @@ end of each request, so that each request is self-contained and has its
 own copies of domain objects. A Rack middleware is provided for this
 purpose.
 
-==== Tuples
+=== Tuples
 
 Identifying tuples don't have to follow the pattern [type, id]. They
 can actually be any array. For example, you might want to identify
@@ -110,7 +109,7 @@ first look up an object by ID, and then later look up the same object
 by parent/child-name, IDRegistry will be smart enough to know you are
 referring to the same object, and will return its cached data.
 
-==== Why?
+=== Why?
 
 IDRegistry is an extraction of an identity map I wrote for a few large
 Rails applications, including the back-end for Pirq (www.pirq.com).
@@ -125,11 +124,11 @@ our domain object management code was greatly simplified, and a whole
 class of bugs was eliminated. We've been using it in production for
 several years, and now we offer it to the community.
 
-==== For more info
+=== For more info
 
 More detailed info is available in the IDRegistry.rdoc file.
 
-=== Dependencies
+== Dependencies
 
 IDRegistry is known to work with the following Ruby implementations:
 
@@ -137,13 +136,13 @@ IDRegistry is known to work with the following Ruby implementations:
 * Rubinius 1.1 or later.
 * JRuby 1.6 or later.
 
-=== Installation
+== Installation
 
 Install IDRegistry as a gem:
 
  gem install idregistry
 
-=== Development and support
+== Development and support
 
 Documentation is available at http://dazuma.github.com/idregistry/rdoc
 
@@ -157,7 +156,7 @@ Report bugs on Github issues at http://github.org/dazuma/idregistry/issues
 
 Contact the author at dazuma at gmail dot com.
 
-=== Acknowledgments
+== Acknowledgments
 
 IDRegistry is written by Daniel Azuma (http://www.daniel-azuma.com).
 
@@ -165,7 +164,7 @@ Development is supported by Pirq (http://www.pirq.com).
 
 Continuous integration service provided by Travis-CI (http://travis-ci.org).
 
-=== License
+== License
 
 Copyright 2012 Daniel Azuma
 
