@@ -71,6 +71,21 @@ module IDRegistry
     end
 
 
+    # Create a new empty registry, duplicating this registry's
+    # configuration.
+    #
+    # If the <tt>:unlocked</tt> option is set to true, the new registry
+    # will have an unlocked configuration that can be modified further.
+    # Otherwise, the new registry's configuration will be locked.
+    #
+    # Spawning a locked registry from a locked configuration is very fast
+    # because it reuses the configuration objects.
+
+    def spawn_registry(opts_={})
+      config.spawn_registry(opts_)
+    end
+
+
     # Return the number of objects cached in the registry.
 
     def size

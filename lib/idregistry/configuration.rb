@@ -69,6 +69,7 @@ module IDRegistry
       @categories = categories_
       @methods = methods_
       @locked = false
+      @mutex = ::Mutex.new
     end
 
 
@@ -112,10 +113,12 @@ module IDRegistry
         types_ = {}
         categories_ = {}
         methods_ = {}
-        @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
-        @types.each{ |k_, v_| types_[k_] = v_.dup }
-        @categories.each{ |k_, v_| categories_[k_] = v_.dup }
-        @methods.each{ |k_, v_| methods_[k_] = v_.dup }
+        @mutex.synchronize do
+          @patterns.each{ |k_, v_| patterns_[k_] = v_.dup }
+          @types.each{ |k_, v_| types_[k_] = v_.dup }
+          @categories.each{ |k_, v_| categories_[k_] = v_.dup }
+          @methods.each{ |k_, v_| methods_[k_] = v_.dup }
+        end
         reg_ = Registry._new(patterns_, types_, categories_, methods_)
         reg_.config.lock unless request_unlocked_
       end
@@ -137,7 +140,9 @@ module IDRegistry
     # (using the spawn_registry call).
 
     def lock
-      @locked = true
+      @mutex.synchronize do
+        @locked = true
+      end
       self
     end
 
@@ -148,7 +153,9 @@ module IDRegistry
     # stored internally, so you cannot modify patterns in place.
 
     def all_patterns
-      @patterns.keys.map{ |a_| a_.dup }
+      @mutex.synchronize do
+        @patterns.keys.map{ |a_| a_.dup }
+      end
     end
 
 
@@ -158,14 +165,18 @@ module IDRegistry
     # generated if you add a pattern without a type.
 
     def all_types
-      @types.keys.find_all{ |t_| !t_.is_a?(AnonymousType) }
+      @mutex.synchronize do
+        @types.keys.find_all{ |t_| !t_.is_a?(AnonymousType) }
+      end
     end
 
 
     # Returns an array of all category types known by this configuration.
 
     def all_categories
-      @categories.keys
+      @mutex.synchronize do
+        @categories.keys
+      end
     end
 
 
@@ -173,35 +184,45 @@ module IDRegistry
     # configuration.
 
     def all_convenience_methods
-      @methods.keys
+      @mutex.synchronize do
+        @methods.keys
+      end
     end
 
 
     # Returns true if this configuration includes the given pattern.
 
     def has_pattern?(pattern_)
-      @patterns.has_key?(pattern_)
+      @mutex.synchronize do
+        @patterns.has_key?(pattern_)
+      end
     end
 
 
     # Returns true if this configuration includes the given object type.
 
     def has_type?(type_)
-      @types.has_key?(type_)
+      @mutex.synchronize do
+        @types.has_key?(type_)
+      end
     end
 
 
     # Returns true if this configuration includes the given category type.
 
     def has_category?(category_)
-      @categories.has_key?(category_)
+      @mutex.synchronize do
+        @categories.has_key?(category_)
+      end
     end
 
 
     # Returns true if this configuration includes the given convenience method.
 
     def has_convenience_method?(method_)
-      @methods.has_key?(method_)
+      @mutex.synchronize do
+        @methods.has_key?(method_)
+      end
     end
 
 
@@ -209,8 +230,10 @@ module IDRegistry
     # Returns nil if the given pattern is not recognized.
 
     def type_for_pattern(pattern_)
-      patdata_ = @patterns[pattern_]
-      patdata_ ? patdata_[0] : nil
+      @mutex.synchronize do
+        patdata_ = @patterns[pattern_]
+        patdata_ ? patdata_[0] : nil
+      end
     end
 
 
@@ -218,8 +241,10 @@ module IDRegistry
     # Returns the empty array if the given object type is not recognized.
 
     def patterns_for_type(type_)
-      typedata_ = @types[type_]
-      typedata_ ? typedata_.dup : []
+      @mutex.synchronize do
+        typedata_ = @types[type_]
+        typedata_ ? typedata_.dup : []
+      end
     end
 
 
@@ -272,11 +297,14 @@ module IDRegistry
       type_ = adder_.type || AnonymousType.new
       gen_obj_ = adder_.to_generate_object
       gen_tuple_ = adder_.to_generate_tuple
-      if @patterns.has_key?(pattern_)
-        raise IllegalConfigurationError, "Pattern already exists"
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        if @patterns.has_key?(pattern_)
+          raise IllegalConfigurationError, "Pattern already exists"
+        end
+        @patterns[pattern_] = [type_, gen_obj_, gen_tuple_]
+        (@types[type_] ||= []) << pattern_
       end
-      @patterns[pattern_] = [type_, gen_obj_, gen_tuple_]
-      (@types[type_] ||= []) << pattern_
       self
     end
 
@@ -286,12 +314,14 @@ module IDRegistry
     # only remaining pattern.
 
     def delete_pattern(pattern_)
-      raise ConfigurationLockedError if @locked
-      if (patdata_ = @patterns.delete(pattern_))
-        type_ = patdata_[0]
-        typedata_ = @types[type_]
-        typedata_.delete(pattern_)
-        @types.delete(type_) if typedata_.empty?
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        if (patdata_ = @patterns.delete(pattern_))
+          type_ = patdata_[0]
+          typedata_ = @types[type_]
+          typedata_.delete(pattern_)
+          @types.delete(type_) if typedata_.empty?
+        end
       end
       self
     end
@@ -301,9 +331,11 @@ module IDRegistry
     # Automatically removes all patterns associated with this object type.
 
     def delete_type(type_)
-      raise ConfigurationLockedError if @locked
-      if (typedata_ = @types.delete(type_))
-        typedata_.each{ |pat_| @patterns.delete(pat_) }
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        if (typedata_ = @types.delete(type_))
+          typedata_.each{ |pat_| @patterns.delete(pat_) }
+        end
       end
       self
     end
@@ -317,11 +349,13 @@ module IDRegistry
     # identify individual categories within this category type.
 
     def add_category(category_, pattern_, indexes_)
-      raise ConfigurationLockedError if @locked
-      if @categories.has_key?(category_)
-        raise IllegalConfigurationError, "Category already exists"
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        if @categories.has_key?(category_)
+          raise IllegalConfigurationError, "Category already exists"
+        end
+        @categories[category_] = [pattern_, indexes_]
       end
-      @categories[category_] = [pattern_, indexes_]
       self
     end
 
@@ -329,8 +363,10 @@ module IDRegistry
     # Remove a category type by name.
 
     def delete_category(category_)
-      raise ConfigurationLockedError if @locked
-      @categories.delete(category_)
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        @categories.delete(category_)
+      end
       self
     end
 
@@ -343,12 +379,14 @@ module IDRegistry
     # generate the actual tuple to be looked up.
 
     def add_convenience_method(name_, pattern_, indexes_)
-      raise ConfigurationLockedError if @locked
-      name_ = name_.to_sym
-      if @methods.has_key?(name_)
-        raise IllegalConfigurationError, "Factory method already exists"
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        name_ = name_.to_sym
+        if @methods.has_key?(name_)
+          raise IllegalConfigurationError, "Factory method already exists"
+        end
+        @methods[name_] = [pattern_, indexes_]
       end
-      @methods[name_] = [pattern_, indexes_]
       self
     end
 
@@ -356,9 +394,10 @@ module IDRegistry
     # Delete a convenience method by name.
 
     def delete_convenience_method(name_)
-      raise ConfigurationLockedError if @locked
-      name_ = name_.to_sym
-      @methods.delete(name_)
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        @methods.delete(name_.to_sym)
+      end
       self
     end
 
@@ -367,11 +406,13 @@ module IDRegistry
     # patterns, categories, and convenience methods.
 
     def clear
-      raise ConfigurationLockedError if @locked
-      @patterns.clear
-      @types.clear
-      @categories.clear
-      @methods.clear
+      @mutex.synchronize do
+        raise ConfigurationLockedError if @locked
+        @patterns.clear
+        @types.clear
+        @categories.clear
+        @methods.clear
+      end
       self
     end
 
