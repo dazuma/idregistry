@@ -40,28 +40,18 @@ a pattern for the identifying tuple, and a block that constructs a new
 object when needed. Here's an example:
 
  # Create and configure the registry at initialization time
- registry = Registry.create do
+ registry = Registry.create do |config|
  
    # The pattern for identifying tuples for user objects
-   add_pattern([:user, Integer]) do
- 
+   config.add_pattern([:user, Integer]) do |tuple|
      # How to construct a user object given a tuple
-     to_generate_object do |tuple|
-       # The second element of the tuple is the integer ID
-       my_construct_user_object_from_id(tuple[1])
-     end
- 
+     my_construct_user_object_from_id(tuple[1])
    end
  
    # The pattern for identifying tuples for post objects
-   add_pattern([:post, Integer]) do
- 
+   config.add_pattern([:post, Integer]) do |tuple|
      # How to construct a post object given a tuple
-     to_generate_object do |tuple|
-       # The second element of the tuple is the integer ID
-       my_construct_post_object_from_id(tuple[1])
-     end
- 
+     my_construct_post_object_from_id(tuple[1])
    end
  
  end

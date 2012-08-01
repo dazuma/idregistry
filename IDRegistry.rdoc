@@ -40,9 +40,9 @@ The job of an IDRegistry is to procure objects by either returning a cached obje
 
 In the previous section, we saw how a "type" of object can be identified with a <i>pattern</i>. Through configuration, we "teach" an IDRegistry how to construct objects for a given pattern. For example, our user objects have identifiers matching the pattern <tt>[:user, Integer]</tt>. We can configure a registry as follows:
 
- my_registry.config.add_pattern
-   pattern [:user, Integer]
-   to_generate_object do |tuple|
+ my_registry.config.add_pattern |pattern|
+   pattern.pattern [:user, Integer]
+   pattern.to_generate_object do |tuple|
      my_create_user_object_given_id(tuple[1])
    end
  end
@@ -71,30 +71,30 @@ These two ways to lookup the object correspond to two different tuples---two dif
 
 IDRegistry, however, supports this case by giving you the ability to connect multiple patterns and associate them with the same object type. Here's how.
 
- my_registry.config do
-   add_pattern do
-     type :tree
-     pattern [:tree, Integer]
-     to_generate_object do |tuple|
+ my_registry.config do |config|
+   config.add_pattern do |pattern|
+     pattern.type :tree
+     pattern.pattern [:tree, Integer]
+     pattern.to_generate_object do |tuple|
        find_tree_node_id(tuple[1])
      end
-     to_generate_tuple do |obj|
+     pattern.to_generate_tuple do |obj|
        [:user, obj.id]
      end
    end
-   add_pattern do
-     type :tree
-     pattern [:tree, Integer, String]
-     to_generate_object do |tuple|
+   config.add_pattern do |pattern|
+     pattern.type :tree
+     pattern.pattern [:tree, Integer, String]
+     pattern.to_generate_object do |tuple|
        find_tree_from_parent_id_and_child_name(tuple[1], tuple[2])
      end
-     to_generate_tuple do |obj|
+     pattern.to_generate_tuple do |obj|
        [:user, obj.parent_id, obj.name]
      end
    end
  end
 
-Let's unpack this. First, notice that we are now specifying a "type" for each pattern. The type is a name for this type of object. If you omit it (as we did earlier), IDRegistry automatically generates an anonymous type for each pattern that you add. In this case, however, we set it explicitly. This lets us specify that both patterns describe tree node objects. Each tree note will now have TWO identifiers, one of each pattern. So doing a lookup for either pattern will return the same object.
+Let's unpack this. First, notice that we are now specifying a "type" for each pattern. The type is a name for this type of object. If you omit it (as we did earlier), IDRegistry automatically generates a new anonymous type for each pattern that you add. In this case, however, we set it explicitly. This lets us specify that both patterns describe the same type of object, a tree node object. Each tree node will now have TWO identifiers, one of each pattern. So doing a lookup for either identifiers will return the same object.
 
 Second, now in addition to the <tt>to_generate_object</tt> block, we now provide a <tt>to_generate_tuple</tt> block. We need to tell IDRegistry how to generate a tuple (identifier) from an object. Why?
 
@@ -107,11 +107,28 @@ At this point, IDRegistry can cache the object and associate it with the tuple <
  # Returns the same object as the original node
  node1 = my_registry.lookup(:tree, node.parent_id, node.name)
 
-So to summarize... if you have only one way to look up an object, you can simply specify the pattern and a <tt>to_generate_object</tt> block. For objects that can be looked up in more than one way, you should also include a type, to connect the various patterns together, and a <tt>to_generate_tuple</tt> block which tells IDRegistry how to generate missing tuples, so that it can look up each object using every identifier pattern.
+So to summarize... if you have only one way to look up an object, you can simply specify the pattern and a <tt>to_generate_object</tt> block. For objects that can be looked up in more than one way, you should also include a type, to connect the various patterns together, and a <tt>to_generate_tuple</tt> block, which tells IDRegistry how to generate missing tuples.
 
-== Scoping to jobs or web requests
+== Web requests
 
-(...to be written...)
+In a web application, you will typically want to "scope" an identity map to a request. That is, you usually won't want objects from one request leaking into the next. IDRegistry provides two different mechanisms to limit the scope of a registry.
+
+First, if you are certain that only one request will be run at a time in any given process, you can keep a single global registry, and just clean it out at the end of a request. IDRegistry provides a Rack middleware for this purpose. If you are running Rails, you can include a Railtie that installs the middleware for you, and gives you a configuration that you can use to specify which registry to clear.
+
+If you are running multithreaded, then you will need multiple registries, one for each request. The easiest way to do this is to configure a registry as a "template" at startup, and then use the spawn_registry method to create a new empty registry from that template for each request. A Rack middleware that implements this strategy is also provided.
+
+== Thread safety
+
+IDRegistry is fully thread safe. All the configuration and object lookup and manipulation methods, are always re-entrant and can be called concurrently from multiple threads. Access to critical sections will be serialized internally.
+
+There is, however, one caveat that has to do with the callbacks for constructing objects or generating tuples. IDRegistry does not include callbacks within a critical section. This means it is possible, in a multi-threaded environment, for a callback to be called but its result to be discarded. Here is the scenario:
+
+* Two threads simultaneously call Registry#lookup for the same tuple that is not already present in the identity map.
+* Both threads check for the tuple and determine that it is not present.
+* Both threads then call the callback to create the object. Both object creations happen concurrently. Two objects have now been created. IDRegistry does not put any mutual exclusion on object creation.
+* However, only one of the two objects will actually be used. Whichever thread actually finishes creating the object first, will be able to store that object in the identity map and return that object. The other slower thread will throw away the object it created, and instead return the object that the first thread created.
+
+Therefore, our desired behavior still holds. Only one copy of the object actually ends up used in the system. However, it is possible, in a multi-threaded environment, for IDRegistry to ask for an object to be created but not actually use it.
 
 == Categories
 
