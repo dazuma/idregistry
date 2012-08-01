@@ -69,6 +69,9 @@ module IDRegistry
             to_generate_object{ |tuple_| Class1.new(tuple_[1].to_i) }
             to_generate_tuple{ |obj_| [:world, obj_.value.to_f] }
           end
+          add_pattern([:anon, ::Integer]) do |tuple_|
+            Class1.new(tuple_[1] * 2)
+          end
         end
       end
 
@@ -202,6 +205,13 @@ module IDRegistry
         assert_nil(@registry.get([:hello, 1.0]))
         assert_equal(obj_.object_id, @registry.get([:hello, 2]).object_id)
         assert_equal(::Set.new([[:hello, 2], [:hello, 2.0]]), ::Set.new(@registry.tuples_for(obj_)))
+      end
+
+
+      def test_lookup_with_no_tuple_generator
+        obj1_ = @registry.lookup([:anon, 1])
+        obj2_ = @registry.lookup([:anon, 1])
+        assert_equal(obj1_.object_id, obj2_.object_id)
       end
 
 

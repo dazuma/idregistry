@@ -242,7 +242,7 @@ module IDRegistry
           if (objdata_ = @tuples[tuple_])
             obj_ = objdata_[0]
           else
-            _internal_add(type_, obj_)
+            _internal_add(type_, obj_, tuple_)
           end
         end
       end
@@ -266,7 +266,7 @@ module IDRegistry
 
       # Synchronize the actual add to protect against concurrent mutation.
       @mutex.synchronize do
-        _internal_add(type_, object_)
+        _internal_add(type_, object_, nil)
       end
       self
     end
@@ -452,7 +452,7 @@ module IDRegistry
     # Internal add method.
     # This needs to be called within synchronization.
 
-    def _internal_add(type_, obj_)  # :nodoc:
+    def _internal_add(type_, obj_, tuple_)  # :nodoc:
       # Check if this object is present already.
       if (objdata_ = @objects[obj_.object_id])
         # The object is present already. If it has the right type,
@@ -466,14 +466,17 @@ module IDRegistry
         # Object is not present.
         # Generate list of tuples to add, and make sure they are unique.
         tuple_list_ = []
-        @types[type_].map do |pat_|
+        @types[type_].each do |pat_|
           if (block_ = @patterns[pat_][2])
-            if (tup_ = block_.call(obj_))
-              if @tuples.has_key?(tup_)
-                raise ObjectKeyError, "New object wants to overwrite an existing tuple: #{tup_.inspect}"
-              end
-              tuple_list_ << tup_
+            tup_ = block_.call(obj_) || tuple_
+          else
+            tup_ = tuple_
+          end
+          if tup_
+            if @tuples.has_key?(tup_)
+              raise ObjectKeyError, "New object wants to overwrite an existing tuple: #{tup_.inspect}"
             end
+            tuple_list_ << tup_
           end
         end
         return false if tuple_list_.size == 0
