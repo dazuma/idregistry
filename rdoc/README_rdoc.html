@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>README - IDRegistry 0.1.0 Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body class="file">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./History_rdoc.html">History</a>
+  
+    <li class="file"><a href="./IDRegistry_rdoc.html">IDRegistry</a>
+  
+    <li class="file"><a href="./README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./IDRegistry.html">IDRegistry</a>
+  
+    <li><a href="./IDRegistry/Configuration.html">IDRegistry::Configuration</a>
+  
+    <li><a href="./IDRegistry/Configuration/AnonymousType.html">IDRegistry::Configuration::AnonymousType</a>
+  
+    <li><a href="./IDRegistry/ConfigurationLockedError.html">IDRegistry::ConfigurationLockedError</a>
+  
+    <li><a href="./IDRegistry/IDRegistryError.html">IDRegistry::IDRegistryError</a>
+  
+    <li><a href="./IDRegistry/IllegalConfigurationError.html">IDRegistry::IllegalConfigurationError</a>
+  
+    <li><a href="./IDRegistry/ObjectKeyError.html">IDRegistry::ObjectKeyError</a>
+  
+    <li><a href="./IDRegistry/PatternAdder.html">IDRegistry::PatternAdder</a>
+  
+    <li><a href="./IDRegistry/Railtie.html">IDRegistry::Railtie</a>
+  
+    <li><a href="./IDRegistry/Railtie/Configuration.html">IDRegistry::Railtie::Configuration</a>
+  
+    <li><a href="./IDRegistry/Registry.html">IDRegistry::Registry</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware.html">IDRegistry::RegistryMiddleware</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware/ClearRegistry.html">IDRegistry::RegistryMiddleware::ClearRegistry</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware/SpawnRegistry.html">IDRegistry::RegistryMiddleware::SpawnRegistry</a>
+  
+    <li><a href="./IDRegistry/Utils.html">IDRegistry::Utils</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation" class="description">
+  
+<h1 id="label-IDRegistry"><a href="IDRegistry.html">IDRegistry</a></h1>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is a generic object generator and
+identity map for Ruby.</p>
+
+<h2 id="label-Introduction+to+IDRegistry">Introduction to <a href="IDRegistry.html">IDRegistry</a></h2>
+
+<p>An <a href="IDRegistry.html">IDRegistry</a> is a hub for obtaining and
+managing domain objects in a Ruby application. It is a configurable general
+registry for identifying and constructing objects when needed, and it
+includes a built-in identity map which caches objects in memory and
+prevents duplicates.</p>
+
+<h3 id="label-An+Example">An Example</h3>
+
+<p>That’s a lot of jargon, so let’s clarify with an example. Suppose you are
+writing a Ruby application in which you have user objects and blog post
+objects, each identified by an ID number (which might be the primary key in
+a database.) In effect, you can uniquely identify any of these domain
+objects by a two-element tuple (array), [type, id], where the type is one
+of the symbols <code>:user</code> or <code>:post</code>, and the id is an
+integer.</p>
+
+<p>An <a href="IDRegistry.html">IDRegistry</a> is a central object that lets
+you obtain any of your domain objects by giving it that unique identifying
+tuple.</p>
+
+<pre># Get the user with ID 1
+first_user = registry.lookup(:user, 1)
+
+# Get the user with ID 2
+second_user = registry.lookup(:user, 2)
+
+# Get the blog post with ID 300
+post = registry.lookup(:post, 300)</pre>
+
+<h3 id="label-Configuration">Configuration</h3>
+
+<p>How does <a href="IDRegistry.html">IDRegistry</a> know how to construct
+your user and post objects? At initialization time, you configure <a
+href="IDRegistry.html">IDRegistry</a>, telling it about each type of object
+it will need to manage. For each object type, you provide a pattern for the
+identifying tuple, and a block that constructs a new object when needed.
+Here’s an example:</p>
+
+<pre class="ruby"><span class="ruby-comment"># Create and configure the registry at initialization time</span>
+<span class="ruby-identifier">registry</span> = <span class="ruby-constant">Registry</span>.<span class="ruby-identifier">create</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+
+  <span class="ruby-comment"># The pattern for identifying tuples for user objects</span>
+  <span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_pattern</span>([:<span class="ruby-identifier">user</span>, <span class="ruby-constant">Integer</span>]) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tuple</span><span class="ruby-operator">|</span>
+    <span class="ruby-comment"># How to construct a user object given a tuple</span>
+    <span class="ruby-identifier">my_construct_user_object_from_id</span>(<span class="ruby-identifier">tuple</span>[<span class="ruby-value">1</span>])
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># The pattern for identifying tuples for post objects</span>
+  <span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_pattern</span>([:<span class="ruby-identifier">post</span>, <span class="ruby-constant">Integer</span>]) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tuple</span><span class="ruby-operator">|</span>
+    <span class="ruby-comment"># How to construct a post object given a tuple</span>
+    <span class="ruby-identifier">my_construct_post_object_from_id</span>(<span class="ruby-identifier">tuple</span>[<span class="ruby-value">1</span>])
+  <span class="ruby-keyword">end</span>
+
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Now, when you ask for a particular tuple, say, [:user, 1], the <a
+href="IDRegistry.html">IDRegistry</a> finds the pattern that matches that
+tuple, and uses it to construct and return the appropriate object.</p>
+
+<h3 id="label-Caching">Caching</h3>
+
+<p>The real power, however, comes from the fact that <a
+href="IDRegistry.html">IDRegistry</a> now caches all the objects it creates
+in an internal hash. So if you ask for the same tuple identifier a second
+time, it doesn’t construct a second object, but simply returns the same
+object it had constructed earlier. In other words, it has a built-in
+identity map.</p>
+
+<pre class="ruby"><span class="ruby-comment"># Get the user with ID 1</span>
+<span class="ruby-identifier">first_user</span> = <span class="ruby-identifier">registry</span>.<span class="ruby-identifier">lookup</span>(:<span class="ruby-identifier">user</span>, <span class="ruby-value">1</span>)
+
+<span class="ruby-comment"># If you re-ask for the same identifier, you get the same object.</span>
+<span class="ruby-identifier">same_user</span> = <span class="ruby-identifier">registry</span>.<span class="ruby-identifier">lookup</span>(:<span class="ruby-identifier">user</span>, <span class="ruby-value">1</span>)
+<span class="ruby-identifier">same_user</span>.<span class="ruby-identifier">object_id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">first_user</span>.<span class="ruby-identifier">object_id</span>  <span class="ruby-comment"># =&gt; true</span>
+</pre>
+
+<p>You can remove cached objects from the registry, forcing the registry to
+re-construct them the next time you ask for them. A common usage pattern in
+a web application is to clear out the registry cache at the end of each
+request, so that each request is self-contained and has its own copies of
+domain objects. A Rack middleware is provided for this purpose.</p>
+
+<h3 id="label-Tuples">Tuples</h3>
+
+<p>Identifying tuples don’t have to follow the pattern [type, id]. They can
+actually be any array. For example, you might want to identify nodes in a
+tree using a combination of parent and child name, rather than just the ID.
+For such tree node objects, you might use a pattern like <code>[:tree,
+Node, String]</code>, where the second element is the parent node itself,
+and the third is the name of the child.</p>
+
+<p>In fact, it is even possible to provide multiple ways of identifying
+objects. Perhaps you want to be able to look up tree nodes by either ID
+number, or by parent/child-name. In configuration, you can tell <a
+href="IDRegistry.html">IDRegistry</a> that these refer to the same type of
+object. Then, if you first look up an object by ID, and then later look up
+the same object by parent/child-name, <a
+href="IDRegistry.html">IDRegistry</a> will be smart enough to know you are
+referring to the same object, and will return its cached data.</p>
+
+<h3 id="label-Why%3F">Why?</h3>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is an extraction of an identity
+map I wrote for a few large Rails applications, including the back-end for
+Pirq (<a href="http://www.pirq.com">www.pirq.com</a>).</p>
+
+<p>Our model objects were getting quite complex with lots of associations and
+dependencies, and we were having difficulty keeping track of which objects
+had already been loaded, and whether we had multiple copies of objects in
+memory that might be getting out of sync with one another.</p>
+
+<p>After we wrote <a href="IDRegistry.html">IDRegistry</a> and refactored our
+object creation to use it, our domain object management code was greatly
+simplified, and a whole class of bugs was eliminated. We’ve been using it
+in production for several years, and now we offer it to the community.</p>
+
+<h3 id="label-For+more+info">For more info</h3>
+
+<p>More detailed info is available in the <a
+href="IDRegistry_rdoc.html">IDRegistry.rdoc</a> file.</p>
+
+<h2 id="label-Dependencies">Dependencies</h2>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is known to work with the
+following Ruby implementations:</p>
+<ul><li>
+<p>Standard “MRI” Ruby 1.8.7 or later. (1.9.2 or later preferred.)</p>
+</li><li>
+<p>Rubinius 1.1 or later.</p>
+</li><li>
+<p>JRuby 1.6 or later.</p>
+</li></ul>
+
+<h2 id="label-Installation">Installation</h2>
+
+<p>Install <a href="IDRegistry.html">IDRegistry</a> as a gem:</p>
+
+<pre>gem install idregistry</pre>
+
+<h2 id="label-Development+and+support">Development and support</h2>
+
+<p>Documentation is available at <a
+href="http://dazuma.github.com/idregistry/rdoc">dazuma.github.com/idregistry/rdoc</a></p>
+
+<p>Source code is hosted on Github at <a
+href="http://github.com/dazuma/idregistry">github.com/dazuma/idregistry</a></p>
+
+<p>Contributions are welcome. Fork the project on Github.</p>
+
+<p>Build status: <a href="http://travis-ci.org/dazuma/idregistry"><img
+src="https://secure.travis-ci.org/dazuma/idregistry.png" /></a></p>
+
+<p>Report bugs on Github issues at <a
+href="http://github.org/dazuma/idregistry/issues">github.org/dazuma/idregistry/issues</a></p>
+
+<p>Contact the author at dazuma at gmail dot com.</p>
+
+<h2 id="label-Acknowledgments">Acknowledgments</h2>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is written by Daniel Azuma (<a
+href="http://www.daniel-azuma.com">www.daniel-azuma.com</a>).</p>
+
+<p>Development is supported by Pirq (<a
+href="http://www.pirq.com">www.pirq.com</a>).</p>
+
+<p>Continuous integration service provided by Travis-CI (<a
+href="http://travis-ci.org">travis-ci.org</a>).</p>
+
+<h2 id="label-License">License</h2>
+
+<p>Copyright 2012 Daniel Azuma</p>
+
+<p>All rights reserved.</p>
+
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:</p>
+<ul><li>
+<p>Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.</p>
+</li><li>
+<p>Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.</p>
+</li><li>
+<p>Neither the name of the copyright holder, nor the names of any other
+contributors to this software, may be used to endorse or promote products
+derived from this software without specific prior written permission.</p>
+</li></ul>
+
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</p>
+
+</div>
+
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

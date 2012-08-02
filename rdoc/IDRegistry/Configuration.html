@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class IDRegistry::Configuration - IDRegistry 0.1.0 Documentation</title>
+
+<link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../index.html">Home</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/idregistry/configuration.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Object
+  
+</nav>
+
+    <!-- Included Modules -->
+<nav id="includes-section" class="section">
+  <h3 class="section-header">Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">::Blockenspiel::DSL</span>
+  
+  
+  </ul>
+</nav>
+
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-add_category">#add_category</a>
+    
+    <li><a href="#method-i-add_convenience_method">#add_convenience_method</a>
+    
+    <li><a href="#method-i-add_pattern">#add_pattern</a>
+    
+    <li><a href="#method-i-all_categories">#all_categories</a>
+    
+    <li><a href="#method-i-all_convenience_methods">#all_convenience_methods</a>
+    
+    <li><a href="#method-i-all_patterns">#all_patterns</a>
+    
+    <li><a href="#method-i-all_types">#all_types</a>
+    
+    <li><a href="#method-i-clear">#clear</a>
+    
+    <li><a href="#method-i-delete_category">#delete_category</a>
+    
+    <li><a href="#method-i-delete_convenience_method">#delete_convenience_method</a>
+    
+    <li><a href="#method-i-delete_pattern">#delete_pattern</a>
+    
+    <li><a href="#method-i-delete_type">#delete_type</a>
+    
+    <li><a href="#method-i-has_category-3F">#has_category?</a>
+    
+    <li><a href="#method-i-has_convenience_method-3F">#has_convenience_method?</a>
+    
+    <li><a href="#method-i-has_pattern-3F">#has_pattern?</a>
+    
+    <li><a href="#method-i-has_type-3F">#has_type?</a>
+    
+    <li><a href="#method-i-lock">#lock</a>
+    
+    <li><a href="#method-i-locked-3F">#locked?</a>
+    
+    <li><a href="#method-i-patterns_for_type">#patterns_for_type</a>
+    
+    <li><a href="#method-i-registry">#registry</a>
+    
+    <li><a href="#method-i-spawn_registry">#spawn_registry</a>
+    
+    <li><a href="#method-i-type_for_pattern">#type_for_pattern</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../History_rdoc.html">History</a>
+  
+    <li class="file"><a href="../IDRegistry_rdoc.html">IDRegistry</a>
+  
+    <li class="file"><a href="../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../IDRegistry.html">IDRegistry</a>
+  
+    <li><a href="../IDRegistry/Configuration.html">IDRegistry::Configuration</a>
+  
+    <li><a href="../IDRegistry/Configuration/AnonymousType.html">IDRegistry::Configuration::AnonymousType</a>
+  
+    <li><a href="../IDRegistry/ConfigurationLockedError.html">IDRegistry::ConfigurationLockedError</a>
+  
+    <li><a href="../IDRegistry/IDRegistryError.html">IDRegistry::IDRegistryError</a>
+  
+    <li><a href="../IDRegistry/IllegalConfigurationError.html">IDRegistry::IllegalConfigurationError</a>
+  
+    <li><a href="../IDRegistry/ObjectKeyError.html">IDRegistry::ObjectKeyError</a>
+  
+    <li><a href="../IDRegistry/PatternAdder.html">IDRegistry::PatternAdder</a>
+  
+    <li><a href="../IDRegistry/Railtie.html">IDRegistry::Railtie</a>
+  
+    <li><a href="../IDRegistry/Railtie/Configuration.html">IDRegistry::Railtie::Configuration</a>
+  
+    <li><a href="../IDRegistry/Registry.html">IDRegistry::Registry</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware.html">IDRegistry::RegistryMiddleware</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware/ClearRegistry.html">IDRegistry::RegistryMiddleware::ClearRegistry</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware/SpawnRegistry.html">IDRegistry::RegistryMiddleware::SpawnRegistry</a>
+  
+    <li><a href="../IDRegistry/Utils.html">IDRegistry::Utils</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class IDRegistry::Configuration</h1>
+
+  <div id="description" class="description">
+    
+<p>A registry configuration.</p>
+
+<p>Access this API by calling the configuration method of a registry.
+Conceptually, the configuration and the registry are just two windows
+(APIs) into the same object.</p>
+
+<p>Once objects are added to the registry, the configuration is locked and
+cannot be modified. Informational methods may still be called.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-add_category" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_category</span><span
+            class="method-args">(category_, pattern_, indexes_=[])</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Add a category type.</p>
+
+<p>You must provide a category type name, a pattern that recognizes tuples
+that should trigger this category, and an array of indexes into the pattern
+that indicates which tuple element(s) will identify individual categories
+within this category type.</p>
+          
+
+          
+          <div class="method-source-code" id="add_category-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 351</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_category</span>(<span class="ruby-identifier">category_</span>, <span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>=[])
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">category_</span>)
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">IllegalConfigurationError</span>, <span class="ruby-string">&quot;Category already exists&quot;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-ivar">@categories</span>[<span class="ruby-identifier">category_</span>] = [<span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>]
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_category-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_category-method -->
+
+    
+      <div id="method-i-add_convenience_method" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_convenience_method</span><span
+            class="method-args">(name_, pattern_, indexes_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Add a convenience method, providing a short cut for doing lookups in the
+registry. You must provide a pattern that serves as a tuple template, and
+an array of indexes. The method will take a number of arguments
+corresponding to that array, and the indexes will then be used as indexes
+into the pattern, replacing pattern elements to generate the actual tuple
+to be looked up.</p>
+          
+
+          
+          <div class="method-source-code" id="add_convenience_method-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 381</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_convenience_method</span>(<span class="ruby-identifier">name_</span>, <span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-identifier">name_</span> = <span class="ruby-identifier">name_</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">name_</span>)
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">IllegalConfigurationError</span>, <span class="ruby-string">&quot;Factory method already exists&quot;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-ivar">@methods</span>[<span class="ruby-identifier">name_</span>] = [<span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>]
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_convenience_method-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_convenience_method-method -->
+
+    
+      <div id="method-i-add_pattern" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_pattern</span><span
+            class="method-args">(*args_, &block_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Add a pattern to the configuration.</p>
+
+<p>You may use one of the following call sequences:</p>
+<dl class="rdoc-list label-list"><dt><code>add_pattern( <em>pattern</em> ) { ... }</code>
+<dd>
+<p>Add a simple pattern, using the given block to generate objects matching
+that pattern.</p>
+</dd><dt><code>add_pattern( <em>pattern</em>, <em>to_generate_object</em> )</code>
+<dd>
+<p>Add a simple pattern, using the given proc to generate objects matching
+that pattern.</p>
+</dd><dt><code>add_pattern( <em>pattern</em>, <em>to_generate_object</em>, <em>to_generate_tuple</em> )</code>
+<dd>
+<p>Add a simple pattern, using the given proc to generate objects matching
+that pattern, and to generate a tuple from an object.</p>
+</dd><dt><code>add_pattern( <em>pattern</em>, <em>type</em>, <em>to_generate_object</em>, <em>to_generate_tuple</em> )</code>
+<dd>
+<p>Add a pattern for the given type. You should provide both a proc to
+generate objects, and a proc to generate a tuple from an object.</p>
+</dd><dt><code>add_pattern() { ... }</code>
+<dd>
+<p>Utilize a <a href="PatternAdder.html">PatternAdder</a> DSL to define the
+pattern.</p>
+</dd></dl>
+          
+
+          
+          <div class="method-source-code" id="add_pattern-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 274</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_pattern</span>(*<span class="ruby-identifier">args_</span>, &amp;<span class="ruby-identifier">block_</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">size</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
+      <span class="ruby-identifier">adder_</span> = <span class="ruby-constant">PatternAdder</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>)
+      <span class="ruby-operator">::</span><span class="ruby-constant">Blockenspiel</span>.<span class="ruby-identifier">invoke</span>(<span class="ruby-identifier">block_</span>, <span class="ruby-identifier">adder_</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">adder_</span> = <span class="ruby-constant">PatternAdder</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-identifier">args_</span>[<span class="ruby-value">0</span>], <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">block_</span>, <span class="ruby-keyword">nil</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">IllegalConfigurationError</span>, <span class="ruby-string">&quot;Did not recognize call sequence for add_pattern&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">size</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">2</span>, <span class="ruby-value">3</span>
+      <span class="ruby-identifier">adder_</span> = <span class="ruby-constant">PatternAdder</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-identifier">args_</span>[<span class="ruby-value">0</span>], <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">args_</span>[<span class="ruby-value">1</span>], <span class="ruby-identifier">args_</span>[<span class="ruby-value">2</span>])
+    <span class="ruby-keyword">when</span> <span class="ruby-value">4</span>
+      <span class="ruby-identifier">adder_</span> = <span class="ruby-constant">PatternAdder</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-identifier">args_</span>[<span class="ruby-value">0</span>], <span class="ruby-identifier">args_</span>[<span class="ruby-value">1</span>], <span class="ruby-identifier">args_</span>[<span class="ruby-value">2</span>], <span class="ruby-identifier">args_</span>[<span class="ruby-value">3</span>])
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">IllegalConfigurationError</span>, <span class="ruby-string">&quot;Did not recognize call sequence for add_pattern&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">pattern_</span> = <span class="ruby-identifier">adder_</span>.<span class="ruby-identifier">pattern</span>
+  <span class="ruby-identifier">type_</span> = <span class="ruby-identifier">adder_</span>.<span class="ruby-identifier">type</span> <span class="ruby-operator">||</span> <span class="ruby-constant">AnonymousType</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">gen_obj_</span> = <span class="ruby-identifier">adder_</span>.<span class="ruby-identifier">to_generate_object</span>
+  <span class="ruby-identifier">gen_tuple_</span> = <span class="ruby-identifier">adder_</span>.<span class="ruby-identifier">to_generate_tuple</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">pattern_</span>)
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">IllegalConfigurationError</span>, <span class="ruby-string">&quot;Pattern already exists&quot;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-ivar">@patterns</span>[<span class="ruby-identifier">pattern_</span>] = [<span class="ruby-identifier">type_</span>, <span class="ruby-identifier">gen_obj_</span>, <span class="ruby-identifier">gen_tuple_</span>]
+    (<span class="ruby-ivar">@types</span>[<span class="ruby-identifier">type_</span>] <span class="ruby-operator">||=</span> []) <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">pattern_</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_pattern-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_pattern-method -->
+
+    
+      <div id="method-i-all_categories" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">all_categories</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of all category types known by this configuration.</p>
+          
+
+          
+          <div class="method-source-code" id="all_categories-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 176</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">all_categories</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">keys</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- all_categories-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- all_categories-method -->
+
+    
+      <div id="method-i-all_convenience_methods" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">all_convenience_methods</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of all convenience method names known by this
+configuration.</p>
+          
+
+          
+          <div class="method-source-code" id="all_convenience_methods-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 186</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">all_convenience_methods</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">keys</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- all_convenience_methods-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- all_convenience_methods-method -->
+
+    
+      <div id="method-i-all_patterns" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">all_patterns</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of all patterns known by this configuration.</p>
+
+<p>The pattern arrays will be duplicates of the actual arrays stored
+internally, so you cannot modify patterns in place.</p>
+          
+
+          
+          <div class="method-source-code" id="all_patterns-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 155</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">all_patterns</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">map</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">a_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">a_</span>.<span class="ruby-identifier">dup</span> }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- all_patterns-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- all_patterns-method -->
+
+    
+      <div id="method-i-all_types" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">all_types</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of all object types known by this configuration.</p>
+
+<p>Does not include any “anonymous” types that are automatically generated if
+you add a pattern without a type.</p>
+          
+
+          
+          <div class="method-source-code" id="all_types-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 167</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">all_types</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">find_all</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">t_</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">t_</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">AnonymousType</span>) }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- all_types-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- all_types-method -->
+
+    
+      <div id="method-i-clear" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">clear</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Clear all configuration information, including all object types, patterns,
+categories, and convenience methods.</p>
+          
+
+          
+          <div class="method-source-code" id="clear-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 408</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">clear</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">clear</span>
+    <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">clear</span>
+    <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">clear</span>
+    <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">clear</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- clear-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- clear-method -->
+
+    
+      <div id="method-i-delete_category" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete_category</span><span
+            class="method-args">(category_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Remove a category type by name.</p>
+          
+
+          
+          <div class="method-source-code" id="delete_category-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 365</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_category</span>(<span class="ruby-identifier">category_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">category_</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete_category-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete_category-method -->
+
+    
+      <div id="method-i-delete_convenience_method" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete_convenience_method</span><span
+            class="method-args">(name_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Delete a convenience method by name.</p>
+          
+
+          
+          <div class="method-source-code" id="delete_convenience_method-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 396</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_convenience_method</span>(<span class="ruby-identifier">name_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">name_</span>.<span class="ruby-identifier">to_sym</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete_convenience_method-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete_convenience_method-method -->
+
+    
+      <div id="method-i-delete_pattern" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete_pattern</span><span
+            class="method-args">(pattern_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Remove the given pattern from this configuration. Automatically removes the
+object type if this is the object type’s only remaining pattern.</p>
+          
+
+          
+          <div class="method-source-code" id="delete_pattern-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 316</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_pattern</span>(<span class="ruby-identifier">pattern_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">patdata_</span> = <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">pattern_</span>))
+      <span class="ruby-identifier">type_</span> = <span class="ruby-identifier">patdata_</span>[<span class="ruby-value">0</span>]
+      <span class="ruby-identifier">typedata_</span> = <span class="ruby-ivar">@types</span>[<span class="ruby-identifier">type_</span>]
+      <span class="ruby-identifier">typedata_</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">pattern_</span>)
+      <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">type_</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">typedata_</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete_pattern-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete_pattern-method -->
+
+    
+      <div id="method-i-delete_type" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete_type</span><span
+            class="method-args">(type_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Remove the given object type from this configuration. Automatically removes
+all patterns associated with this object type.</p>
+          
+
+          
+          <div class="method-source-code" id="delete_type-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 333</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_type</span>(<span class="ruby-identifier">type_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">typedata_</span> = <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">type_</span>))
+      <span class="ruby-identifier">typedata_</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">pat_</span><span class="ruby-operator">|</span> <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">pat_</span>) }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete_type-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete_type-method -->
+
+    
+      <div id="method-i-has_category-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">has_category?</span><span
+            class="method-args">(category_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if this configuration includes the given category type.</p>
+          
+
+          
+          <div class="method-source-code" id="has_category-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 213</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_category?</span>(<span class="ruby-identifier">category_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">category_</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- has_category-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- has_category-3F-method -->
+
+    
+      <div id="method-i-has_convenience_method-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">has_convenience_method?</span><span
+            class="method-args">(method_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if this configuration includes the given convenience method.</p>
+          
+
+          
+          <div class="method-source-code" id="has_convenience_method-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 222</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_convenience_method?</span>(<span class="ruby-identifier">method_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">method_</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- has_convenience_method-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- has_convenience_method-3F-method -->
+
+    
+      <div id="method-i-has_pattern-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">has_pattern?</span><span
+            class="method-args">(pattern_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if this configuration includes the given pattern.</p>
+          
+
+          
+          <div class="method-source-code" id="has_pattern-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 195</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_pattern?</span>(<span class="ruby-identifier">pattern_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">pattern_</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- has_pattern-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- has_pattern-3F-method -->
+
+    
+      <div id="method-i-has_type-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">has_type?</span><span
+            class="method-args">(type_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if this configuration includes the given object type.</p>
+          
+
+          
+          <div class="method-source-code" id="has_type-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 204</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_type?</span>(<span class="ruby-identifier">type_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">type_</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- has_type-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- has_type-3F-method -->
+
+    
+      <div id="method-i-lock" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lock</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Lock the configuration, preventing further changes.</p>
+
+<p>This is called by registries when you start using them.</p>
+
+<p>In addition, it is cheap to spawn another registry from a configuration
+that is locked, because the configuration internals can be reused.
+Therefore, you should lock a configuration if you want to use it as a
+template to create empty registries quickly (using the <a
+href="Configuration.html#method-i-spawn_registry">#spawn_registry</a>
+call).</p>
+          
+
+          
+          <div class="method-source-code" id="lock-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 142</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lock</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@locked</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lock-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lock-method -->
+
+    
+      <div id="method-i-locked-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">locked?</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if this configuration has been locked. A locked configuration
+can no longer be modified. Registries lock their configurations once you
+start using them.</p>
+          
+
+          
+          <div class="method-source-code" id="locked-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 85</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">locked?</span>
+  <span class="ruby-ivar">@locked</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- locked-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- locked-3F-method -->
+
+    
+      <div id="method-i-patterns_for_type" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">patterns_for_type</span><span
+            class="method-args">(type_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of patterns corresponding to the given object type.
+Returns the empty array if the given object type is not recognized.</p>
+          
+
+          
+          <div class="method-source-code" id="patterns_for_type-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 243</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">patterns_for_type</span>(<span class="ruby-identifier">type_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">typedata_</span> = <span class="ruby-ivar">@types</span>[<span class="ruby-identifier">type_</span>]
+    <span class="ruby-identifier">typedata_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">typedata_</span>.<span class="ruby-identifier">dup</span> <span class="ruby-operator">:</span> []
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- patterns_for_type-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- patterns_for_type-method -->
+
+    
+      <div id="method-i-registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">registry</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns the registry that owns this configuration.</p>
+          
+
+          
+          <div class="method-source-code" id="registry-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 92</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">registry</span>
+  <span class="ruby-ivar">@registry</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- registry-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- registry-method -->
+
+    
+      <div id="method-i-spawn_registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">spawn_registry</span><span
+            class="method-args">(opts_={})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Create a new empty registry, duplicating this configuration.</p>
+
+<p>If the <code>:unlocked</code> option is set to true, the new registry will
+have an unlocked configuration that can be modified further. Otherwise, the
+new registry’s configuration will be locked.</p>
+
+<p>Spawning a locked registry from a locked configuration is very fast because
+it reuses the configuration objects.</p>
+          
+
+          
+          <div class="method-source-code" id="spawn_registry-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 106</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn_registry</span>(<span class="ruby-identifier">opts_</span>={})
+  <span class="ruby-identifier">request_unlocked_</span> = <span class="ruby-identifier">opts_</span>[<span class="ruby-value">:unlocked</span>]
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">request_unlocked_</span>
+    <span class="ruby-identifier">reg_</span> = <span class="ruby-constant">Registry</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-ivar">@patterns</span>, <span class="ruby-ivar">@types</span>, <span class="ruby-ivar">@categories</span>, <span class="ruby-ivar">@methods</span>)
+    <span class="ruby-identifier">reg_</span>.<span class="ruby-identifier">config</span>.<span class="ruby-identifier">lock</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">patterns_</span> = {}
+    <span class="ruby-identifier">types_</span> = {}
+    <span class="ruby-identifier">categories_</span> = {}
+    <span class="ruby-identifier">methods_</span> = {}
+    <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">k_</span>, <span class="ruby-identifier">v_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">patterns_</span>[<span class="ruby-identifier">k_</span>] = <span class="ruby-identifier">v_</span>.<span class="ruby-identifier">dup</span> }
+      <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">k_</span>, <span class="ruby-identifier">v_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">types_</span>[<span class="ruby-identifier">k_</span>] = <span class="ruby-identifier">v_</span>.<span class="ruby-identifier">dup</span> }
+      <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">k_</span>, <span class="ruby-identifier">v_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">categories_</span>[<span class="ruby-identifier">k_</span>] = <span class="ruby-identifier">v_</span>.<span class="ruby-identifier">dup</span> }
+      <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">k_</span>, <span class="ruby-identifier">v_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">methods_</span>[<span class="ruby-identifier">k_</span>] = <span class="ruby-identifier">v_</span>.<span class="ruby-identifier">dup</span> }
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">reg_</span> = <span class="ruby-constant">Registry</span>.<span class="ruby-identifier">_new</span>(<span class="ruby-identifier">patterns_</span>, <span class="ruby-identifier">types_</span>, <span class="ruby-identifier">categories_</span>, <span class="ruby-identifier">methods_</span>)
+    <span class="ruby-identifier">reg_</span>.<span class="ruby-identifier">config</span>.<span class="ruby-identifier">lock</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">request_unlocked_</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">reg_</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- spawn_registry-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- spawn_registry-method -->
+
+    
+      <div id="method-i-type_for_pattern" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">type_for_pattern</span><span
+            class="method-args">(pattern_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns the object type corresponding to the given pattern. Returns nil if
+the given pattern is not recognized.</p>
+          
+
+          
+          <div class="method-source-code" id="type_for_pattern-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 232</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type_for_pattern</span>(<span class="ruby-identifier">pattern_</span>)
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">patdata_</span> = <span class="ruby-ivar">@patterns</span>[<span class="ruby-identifier">pattern_</span>]
+    <span class="ruby-identifier">patdata_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">patdata_</span>[<span class="ruby-value">0</span>] <span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- type_for_pattern-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- type_for_pattern-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

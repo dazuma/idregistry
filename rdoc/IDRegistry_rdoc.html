@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>IDRegistry - IDRegistry 0.1.0 Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body class="file">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./History_rdoc.html">History</a>
+  
+    <li class="file"><a href="./IDRegistry_rdoc.html">IDRegistry</a>
+  
+    <li class="file"><a href="./README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./IDRegistry.html">IDRegistry</a>
+  
+    <li><a href="./IDRegistry/Configuration.html">IDRegistry::Configuration</a>
+  
+    <li><a href="./IDRegistry/Configuration/AnonymousType.html">IDRegistry::Configuration::AnonymousType</a>
+  
+    <li><a href="./IDRegistry/ConfigurationLockedError.html">IDRegistry::ConfigurationLockedError</a>
+  
+    <li><a href="./IDRegistry/IDRegistryError.html">IDRegistry::IDRegistryError</a>
+  
+    <li><a href="./IDRegistry/IllegalConfigurationError.html">IDRegistry::IllegalConfigurationError</a>
+  
+    <li><a href="./IDRegistry/ObjectKeyError.html">IDRegistry::ObjectKeyError</a>
+  
+    <li><a href="./IDRegistry/PatternAdder.html">IDRegistry::PatternAdder</a>
+  
+    <li><a href="./IDRegistry/Railtie.html">IDRegistry::Railtie</a>
+  
+    <li><a href="./IDRegistry/Railtie/Configuration.html">IDRegistry::Railtie::Configuration</a>
+  
+    <li><a href="./IDRegistry/Registry.html">IDRegistry::Registry</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware.html">IDRegistry::RegistryMiddleware</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware/ClearRegistry.html">IDRegistry::RegistryMiddleware::ClearRegistry</a>
+  
+    <li><a href="./IDRegistry/RegistryMiddleware/SpawnRegistry.html">IDRegistry::RegistryMiddleware::SpawnRegistry</a>
+  
+    <li><a href="./IDRegistry/Utils.html">IDRegistry::Utils</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation" class="description">
+  
+<h1 id="label-IDRegistry"><a href="IDRegistry.html">IDRegistry</a></h1>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is a generic object generator and
+identity map for Ruby.</p>
+
+<p>This document provides an in-depth introduction to using <a
+href="IDRegistry.html">IDRegistry</a>. For a quick introduction, see the <a
+href="README_rdoc.html">README</a>.</p>
+
+<h2 id="label-Identity+Maps+and+Registries">Identity Maps and Registries</h2>
+
+<p><a href="IDRegistry.html">IDRegistry</a> combines two patterns from Martin
+Fowler's book "Patterns of Enterprise Application Architecture": the
+Identity Map pattern and the Registry pattern.</p>
+
+<p>An Identity Map is essentially an in-memory cache that references objects
+based on a unique identifier. Whenever you want to obtain an object, you
+first check the cache to see if the object already exists—technically, if
+the cache contains an object for the given unique identifier. If so, you
+pull that existing instance directly from the cache. Otherwise, you
+construct the object, making any necessary database calls, and then insert
+it into the cache. It has now effectively been memoized, and the next time
+you request that identifier, that same instance will be returned again from
+the cache.</p>
+
+<p>In addition to the performance benefits of a cache, an Identity Map also
+ensures that at most one copy of any object will exist in your system at
+any time. This effectively eliminates a whole class of bugs that could
+arise if you construct multiple copies of an object whose states get out of
+sync with each other.</p>
+
+<p>Identity Map is a highly useful pattern, but by itself it tends to be
+cumbersome to implement. This is because you have to find every point in
+the code that constructs a model object, and inject some code to manage the
+cache. To solve this, we combine it with the Registry pattern. A Registry
+is simply a central source for object procurement; any code that wants to
+obtain a model object must get it from the Registry. The Registry knows how
+to construct the object if needed. Thus, it is able to encapsulate the
+Identity Map logic, providing a one-stop solution for object procurement
+with caching and duplication elimination. This combination is what we call
+an <a href="IDRegistry.html">IDRegistry</a>.</p>
+
+<h2 id="label-Tuples+and+Patterns">Tuples and Patterns</h2>
+
+<p>A common practice is to use database primary keys as the unique identifiers
+for an Identity Map. However, if you are managing multiple kinds of
+objects, objects that span multiple tables or aren’t associated with any
+particular database row, or objects that otherwise need to be identified
+across more than one dimension, you need a more versatile unique
+identifier.</p>
+
+<p><a href="IDRegistry.html">IDRegistry</a> uses arrays, or <em>tuples</em> as
+we will call them, as unique identifiers. This allows us to support a wide
+variety of identification strategies. A simple example is to employ a
+two-element tuple: the first element being a type indicator, and the second
+being a database primary key. For example, suppose your application had two
+types of entities: users and blog posts. Your user objects could employ
+unique identifiers of the form <code>[:user, <em>user-id</em>]</code>, and
+your post objects could employ identifiers of the form <code>[:post,
+<em>post-id</em>]</code>. So the tuple <code>[:user, 1]</code> identifies
+the user with ID 1, and the tuple <code>[:post, 210]</code> identifies the
+post with ID 210.</p>
+
+<p>Such “forms” of tuples that correspond to “types” of objects, we denote as
+<em>patterns</em>. A pattern is an array like a tuple, but some of its
+elements are placeholders rather than values. For example, <code>[:user,
+1]</code> is a tuple that identifies the particular user with ID 1, while
+<code>[:user, Integer]</code> is the pattern followed by user identifiers.
+The <code>Integer</code> element is a placeholder that matches certain
+kinds of values—in this case, integer IDs. Similarly, <code>[:post,
+Integer]</code> is the pattern followed by blog post identifiers.</p>
+
+<p>It is also common to use <code>String</code> as a placeholder element used
+in patterns. For example, if you have contacts that should be identified by
+a unique phone number, you could use tuples with the pattern
+<code>[:contact, String]</code> where the unique phone number is
+represented as a string.</p>
+
+<p>Indeed, technically, a placeholder element can be any object that responds
+appropriately to the === operator. In most cases, these will be class or
+module objects such as <code>Integer</code> or <code>String</code> above;
+however, patterns can utilize regular expressions, or any other object that
+classifies based on the === operator.</p>
+
+<p>Additionally, tuples (and patterns) can be longer and more complex than the
+two-element examples above. Suppose you have objects that represent
+relationships between users in a social network. Each relationship might be
+identified by the two user IDs of the users involved. Correspondingly, your
+identifier tuples might follow the pattern <code>[:relationship, Integer,
+Integer]</code>.</p>
+
+<h2 id="label-Basic+IDRegistry+usage">Basic <a href="IDRegistry.html">IDRegistry</a> usage</h2>
+
+<p>Creating an <a href="IDRegistry.html">IDRegistry</a> is as simple as
+calling the <code>create</code> method:</p>
+
+<pre>my_registry = IDRegistry.create</pre>
+
+<p>The job of an <a href="IDRegistry.html">IDRegistry</a> is to procure
+objects by either returning a cached object or creating a new one. Thus, it
+needs to know how to construct your model objects. You accomplish this by
+configuring the registry at application initialization time, telling it how
+to construct the various types of objects it needs to manage.</p>
+
+<p>In the previous section, we saw how a “type” of object can be identified
+with a <em>pattern</em>. Through configuration, we “teach” an <a
+href="IDRegistry.html">IDRegistry</a> how to construct objects for a given
+pattern. For example, our user objects have identifiers matching the
+pattern <code>[:user, Integer]</code>. We can configure a registry as
+follows:</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_pattern</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pattern</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">pattern</span> [:<span class="ruby-identifier">user</span>, <span class="ruby-constant">Integer</span>]
+  <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">to_generate_object</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tuple</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">my_create_user_object_given_id</span>(<span class="ruby-identifier">tuple</span>[<span class="ruby-value">1</span>])
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>The <code>add_pattern</code> configuration command teaches the <a
+href="IDRegistry.html">IDRegistry</a> about a certain pattern. If the
+registry encounters a tuple identifier matching that pattern, it specifies
+how to construct the object given that tuple.</p>
+
+<p>You can add any number of pattern configurations to a registry, covering
+any number of object types.</p>
+
+<p>Once you have configured your <a href="IDRegistry.html">IDRegistry</a>,
+using it is simple. Call the <code>lookup</code> method to obtain an object
+given a tuple. The registry will check its cache and return the object, or
+it will invoke the matching pattern configuration to create it.</p>
+
+<pre>user1 = my_registry.lookup(:user, 1)   # constructs a user object
+user1a = my_registry.lookup(:user, 1)  # returns the same user object</pre>
+
+<p>If you want to clear the cache and force the registry to construct new
+objects, use the <code>clear</code> method:</p>
+
+<pre>my_registry.clear</pre>
+
+<h2 id="label-Multiple+identifiers+for+an+object">Multiple identifiers for an object</h2>
+
+<p>Sometimes there will be several different mechanisms for identifying an
+object to procure. Consider a tree stored in the database, in which each
+node has a name that is unique among its siblings. Now, each node might
+have a database primary key, so you could identify objects using the
+pattern <code>[:node, Integer]</code>. However, since the combination of
+parent and name is unique, you could also uniquely identify objects using
+that combination: <code>[:node, Integer, String]</code> for parent ID and
+child name. These two patterns represent two different ways of looking up a
+tree node:</p>
+
+<pre>object = find_tree_node_id(id)
+object = find_tree_from_parent_id_and_child_name(parent_id, child_name)</pre>
+
+<p>These two ways to lookup the object correspond to two different tuples—two
+different unique identifiers. In a simple Identity Map, this would not
+work. It might create an object using the first identifier, and then create
+a second object using the second identifier, even if semantically they
+should be the same object.</p>
+
+<p><a href="IDRegistry.html">IDRegistry</a>, however, supports this case by
+giving you the ability to define multiple patterns and associate them with
+the same object type. Here's how.</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_pattern</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pattern</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">type</span> :<span class="ruby-identifier">treenode</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">pattern</span> [:<span class="ruby-identifier">node</span>, <span class="ruby-constant">Integer</span>]
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">to_generate_object</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tuple</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">find_tree_node_id</span>(<span class="ruby-identifier">tuple</span>[<span class="ruby-value">1</span>])
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">to_generate_tuple</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">obj</span><span class="ruby-operator">|</span>
+      [:<span class="ruby-identifier">node</span>, <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">id</span>]
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_pattern</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pattern</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">type</span> :<span class="ruby-identifier">treenode</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">pattern</span> [:<span class="ruby-identifier">node</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-constant">String</span>]
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">to_generate_object</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tuple</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">find_tree_from_parent_id_and_child_name</span>(<span class="ruby-identifier">tuple</span>[<span class="ruby-value">1</span>], <span class="ruby-identifier">tuple</span>[<span class="ruby-value">2</span>])
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">to_generate_tuple</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">obj</span><span class="ruby-operator">|</span>
+      [:<span class="ruby-identifier">node</span>, <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">name</span>]
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Let’s unpack this. First, notice that we are now specifying a “type” for
+each pattern. The type is a name for this type of object. If you omit it
+(as we did earlier), <a href="IDRegistry.html">IDRegistry</a> treats each
+pattern as a separate anonymous type. In this case, however, we set it
+explicitly. This lets us specify that both patterns describe the same type
+of object, a tree node object. Each tree node will now have TWO
+identifiers, one of each pattern. Doing a lookup for either identifiers
+will return the same object.</p>
+
+<p>Second, now in addition to the <code>to_generate_object</code> block, we
+now provide a <code>to_generate_tuple</code> block. We need to tell <a
+href="IDRegistry.html">IDRegistry</a> how to generate a tuple (identifier)
+from an object. Why?</p>
+
+<p>Well, suppose were were to look up a tree node by ID:</p>
+
+<pre># Look up a node by database ID
+node = my_registry.lookup(:node, 10)</pre>
+
+<p>At this point, <a href="IDRegistry.html">IDRegistry</a> can cache the
+object and associate it with the tuple <code>[:node, 10]</code> so that you
+can look it up using that tuple again. However, that object also has a
+parent and a name (suppose the parent ID is 9 and the name is “foo”). This
+means we would like to be able to look up that <em>same</em> object using
+the tuple <code>[:node, 9, &quot;foo&quot;]</code>.</p>
+
+<pre># Should the same object as the original node
+node1 = my_registry.lookup(:node, node.parent_id, node.name)</pre>
+
+<p><a href="IDRegistry.html">IDRegistry</a> therefore needs you to teach it
+how to generate that other tuple for the object. Similarly, if you
+originally looked up the tree node by parent ID and name, <a
+href="IDRegistry.html">IDRegistry</a> needs you to teach it how to generate
+the corresponding simple ID tuple.</p>
+
+<p>So to summarize… if you have only one way to look up an object, you can
+simply specify the pattern and a <code>to_generate_object</code> block. For
+objects that can be looked up in more than one way, you should also include
+a type, to connect the various patterns together, and a
+<code>to_generate_tuple</code> block, which tells <a
+href="IDRegistry.html">IDRegistry</a> how to generate missing tuples.</p>
+
+<h2 id="label-Categories">Categories</h2>
+
+<p>Identity maps generally support one-to-one correspondence between objects
+and unique identifiers. We have already seen how <a
+href="IDRegistry.html">IDRegistry</a> can support multiple identifiers for
+an object, for object types that require multiple modes of lookup. In this
+section, we cover categories, which are special identifiers that can
+reference zero, one, or multiple objects that are already present in the
+identity map. <a href="IDRegistry.html">IDRegistry</a> can look up the
+collection of objects that match a given category, or use categories to
+delete groups of objects out of the identity map quickly.</p>
+
+<p>We’ll cover an example. Take the “tree node” object type that we covered
+earlier. One of the patterns for a tree node identifies the node by parent
+ID and child name: <code>[:tree, Integer, String]</code>. This pattern lets
+us look up a <em>specific</em> child of a given node. However, suppose we
+want <em>all</em> the children (that have been loaded into the identity map
+so far) of a given parent. Somehow, we want to provide a specific parent
+ID, but a wildcard for the name.</p>
+
+<p>That is how categories are defined. We start with an identifier pattern
+such as our example <code>[:tree, Integer, String]</code>. Now we choose
+some number (zero or more) of the placeholder elements that we want to
+<em>specify</em>. In this example, we want to specify the parent ID, so we
+choose array index 1, which is the parent ID in our pattern. We call this
+sequence of element indexes the “category indexes”. In this case, the
+category indexes are <code>[1]</code>. The rest of the placeholders (in our
+example, array index 2, the child name) will be treated as wildcards.</p>
+
+<p>To define such a category, provide a name, a pattern for identifiers, and
+an array of category indexes, in the registry’s configuration as follows:</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">add_category</span>(:<span class="ruby-identifier">node_parent</span>, [:<span class="ruby-identifier">tree</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-constant">String</span>], [<span class="ruby-value">1</span>])
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Note that what we’ve done here is create a <em>class</em> of
+categories—specifically, the class of categories that include the children
+of given parent nodes. In order to specify a <em>particular</em> category,
+we must say <em>which</em> parent node. To do that, we take each of the
+indexes in the category index array (currently just one) and we assign each
+a particular value. In our example, suppose we want to specify the
+particular category with parent ID 9. We assign the value 9 to the first
+and only category index, and we get the array <code>[9]</code>. This new
+array is what we call the “category spec”. It specifies a particular
+category out of our class, in this case, the category of tree nodes whose
+parent ID is 9.</p>
+
+<p>To look up nodes by category, for example, you must provide the name of the
+class of categories, and the category spec indicating which particular
+category.</p>
+
+<pre>objects = my_registry.objects_in_category(:node_parent, [9])</pre>
+
+<p>There are many different ways to specify categories. Sometimes you want a
+single “one-off” category that isn’t part of a class of categories. For
+example, you could define a category that includes ALL tree node objects
+like this:</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">add_category</span>(:<span class="ruby-identifier">all_nodes</span>, [:<span class="ruby-identifier">tree</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-constant">String</span>], [])
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Note that we set the same pattern but now we have no category indexes. This
+means, we are not going to specify any parameters in order to identify a
+particular category. Instead, both parent ID and name string are wildcards,
+and all tree nodes will fall into the same category. This is still a
+“class” of categories, but a degenerate one with no parameters. When we
+want to look up the objects, our category spec is similarly the empty
+array, since we have no category indexes for which to provide values.</p>
+
+<pre>objects = my_registry.objects_in_category(:all_nodes, [])</pre>
+
+<p>Some classes of categories may be parameterized by multiple elements. For
+example, if we set up a category like this:</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">add_category</span>(:<span class="ruby-identifier">parent_and_name</span>, [:<span class="ruby-identifier">tree</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-constant">String</span>], [<span class="ruby-value">1</span>, <span class="ruby-value">2</span>])
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Now our category is parameterized by both parent and name. This isn’t a
+very useful class of categories since each will contain at most one
+element. I show it merely to illustrate that you can have multiple category
+indexes. So here’s how to get all the objects in the “category of objects
+with parent ID 9 and name foo”:</p>
+
+<pre>objects = my_registry.objects_in_category(:parent_and_name, [9, &quot;foo&quot;])</pre>
+
+<p>Finally, here is one more example. Suppose you did this:</p>
+
+<pre class="ruby"><span class="ruby-identifier">my_registry</span>.<span class="ruby-identifier">config</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">add_category</span>(:<span class="ruby-identifier">named_foo</span>, [:<span class="ruby-identifier">tree</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-string">'foo'</span>], [])
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Notice that we’ve replaced the “child name” placeholder with a particular
+ID. That element is no longer a placeholder, but a specific value. This is
+now a one-off category (i.e. a degenerate class of categories with no
+parameters) of objects whose name is “foo”. The pattern that you use to
+define a category doesn’t have to be exactly one of the patterns that you
+use to define an object type. It just has to match actual identifier tuples
+in your registry.</p>
+
+<h2 id="label-Web+requests">Web requests</h2>
+
+<p>In a web application, you will typically want to “scope” an identity map to
+a request. That is, you usually won’t want objects from one request leaking
+into the next. <a href="IDRegistry.html">IDRegistry</a> provides two
+different mechanisms to limit the scope of a registry.</p>
+
+<p>First, if you are certain that only one request will be run at a time in
+any given process, you can keep a single global registry, and just clean it
+out at the end of a request. <a href="IDRegistry.html">IDRegistry</a>
+provides a Rack middleware for this purpose. If you are running Rails, you
+can include a Railtie that installs the middleware for you, and gives you a
+configuration that you can use to specify which registry to clear.</p>
+
+<p>If you are running multithreaded, then you will need multiple registries,
+one for each request. The easiest way to do this is to configure a registry
+as a “template” at startup, and then use the spawn_registry method to
+create a new empty registry from that template for each request. A Rack
+middleware that implements this strategy is also provided.</p>
+
+<h2 id="label-Thread+safety">Thread safety</h2>
+
+<p><a href="IDRegistry.html">IDRegistry</a> is fully thread safe. All object
+lookup and manipulation methods, as well as configuration methods, are
+re-entrant and can be called concurrently from multiple threads. The
+desired invariant, that a registry will contain at most one copy of any
+given object, will be maintained.</p>
+
+<p>There is, however, one caveat that has to do with the callbacks for
+constructing objects or generating tuples. <a
+href="IDRegistry.html">IDRegistry</a> does not include those callbacks
+within its critical sections. (To do so would invite deadlocks.) Instead,
+we run callbacks eagerly and serialize later on insertion. This means it is
+possible, in a multi-threaded environment, for a callback to be called but
+its result to be discarded. Here is the scenario:</p>
+<ul><li>
+<p>Two threads simultaneously call Registry#lookup for the same tuple that is
+not already present in the identity map.</p>
+</li><li>
+<p>Within <a href="IDRegistry.html">IDRegistry</a>, both threads check for the
+tuple and determine that it is not present.</p>
+</li><li>
+<p>Both threads then call the callback to create the object. Because <a
+href="IDRegistry.html">IDRegistry</a> does not put any mutual exclusion on
+callbacks, they execute concurrently and create two separate objects.</p>
+</li><li>
+<p>However, only one of the two objects will actually be used. <a
+href="IDRegistry.html">IDRegistry</a> will use the object created by
+whichever thread finishes first, and throw away the object created by the
+slower thread. Both threads will return the same object, the first thread’s
+copy, from the call.</p>
+</li></ul>
+
+<p>Therefore, our desired behavior still holds; however, you should be aware
+that it is possible for more than one copy of an object to have been
+created in the interim.</p>
+
+</div>
+
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

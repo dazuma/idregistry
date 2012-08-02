@@ -1,0 +1,12 @@
+Wed, 01 Aug 2012 22:23:26 -0700
+lib/idregistry/configuration.rb	Wed, 01 Aug 2012 21:35:05 -0700
+lib/idregistry/errors.rb	Mon, 23 Jul 2012 17:08:33 -0700
+lib/idregistry/middleware.rb	Mon, 23 Jul 2012 20:52:23 -0700
+lib/idregistry/railtie.rb	Mon, 23 Jul 2012 21:57:30 -0700
+lib/idregistry/registry.rb	Wed, 01 Aug 2012 22:03:05 -0700
+lib/idregistry/utils.rb	Sat, 21 Jul 2012 13:35:02 -0700
+lib/idregistry/version.rb	Sat, 21 Jul 2012 13:34:12 -0700
+lib/idregistry.rb	Sat, 21 Jul 2012 13:34:02 -0700
+History.rdoc	Tue, 31 Jul 2012 23:07:05 -0700
+IDRegistry.rdoc	Wed, 01 Aug 2012 22:08:39 -0700
+README.rdoc	Wed, 25 Jul 2012 22:32:13 -0700

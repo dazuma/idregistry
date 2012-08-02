@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class IDRegistry::Registry - IDRegistry 0.1.0 Documentation</title>
+
+<link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../index.html">Home</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/idregistry/registry.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Object
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-add">#add</a>
+    
+    <li><a href="#method-i-categories">#categories</a>
+    
+    <li><a href="#method-i-clear">#clear</a>
+    
+    <li><a href="#method-i-config">#config</a>
+    
+    <li><a href="#method-i-delete">#delete</a>
+    
+    <li><a href="#method-i-delete_category">#delete_category</a>
+    
+    <li><a href="#method-i-get">#get</a>
+    
+    <li><a href="#method-i-include-3F">#include?</a>
+    
+    <li><a href="#method-i-lookup">#lookup</a>
+    
+    <li><a href="#method-i-objects_in_category">#objects_in_category</a>
+    
+    <li><a href="#method-i-rekey">#rekey</a>
+    
+    <li><a href="#method-i-size">#size</a>
+    
+    <li><a href="#method-i-spawn_registry">#spawn_registry</a>
+    
+    <li><a href="#method-i-tuples_for">#tuples_for</a>
+    
+    <li><a href="#method-i-tuples_in_category">#tuples_in_category</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../History_rdoc.html">History</a>
+  
+    <li class="file"><a href="../IDRegistry_rdoc.html">IDRegistry</a>
+  
+    <li class="file"><a href="../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../IDRegistry.html">IDRegistry</a>
+  
+    <li><a href="../IDRegistry/Configuration.html">IDRegistry::Configuration</a>
+  
+    <li><a href="../IDRegistry/Configuration/AnonymousType.html">IDRegistry::Configuration::AnonymousType</a>
+  
+    <li><a href="../IDRegistry/ConfigurationLockedError.html">IDRegistry::ConfigurationLockedError</a>
+  
+    <li><a href="../IDRegistry/IDRegistryError.html">IDRegistry::IDRegistryError</a>
+  
+    <li><a href="../IDRegistry/IllegalConfigurationError.html">IDRegistry::IllegalConfigurationError</a>
+  
+    <li><a href="../IDRegistry/ObjectKeyError.html">IDRegistry::ObjectKeyError</a>
+  
+    <li><a href="../IDRegistry/PatternAdder.html">IDRegistry::PatternAdder</a>
+  
+    <li><a href="../IDRegistry/Railtie.html">IDRegistry::Railtie</a>
+  
+    <li><a href="../IDRegistry/Railtie/Configuration.html">IDRegistry::Railtie::Configuration</a>
+  
+    <li><a href="../IDRegistry/Registry.html">IDRegistry::Registry</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware.html">IDRegistry::RegistryMiddleware</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware/ClearRegistry.html">IDRegistry::RegistryMiddleware::ClearRegistry</a>
+  
+    <li><a href="../IDRegistry/RegistryMiddleware/SpawnRegistry.html">IDRegistry::RegistryMiddleware::SpawnRegistry</a>
+  
+    <li><a href="../IDRegistry/Utils.html">IDRegistry::Utils</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class IDRegistry::Registry</h1>
+
+  <div id="description" class="description">
+    
+<p>A registry object.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-add" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add</span><span
+            class="method-args">(type_, object_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Add the given object to the registry. You must specify the type of object,
+which is used to determine what tuples correspond to it.</p>
+          
+
+          
+          <div class="method-source-code" id="add-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 260</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add</span>(<span class="ruby-identifier">type_</span>, <span class="ruby-identifier">object_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-comment"># Some sanity checks of the arguments.</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">object_</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ObjectKeyError</span>, <span class="ruby-string">&quot;Attempt to add a nil object&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@types</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">type_</span>)
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ObjectKeyError</span>, <span class="ruby-node">&quot;Unrecognized type: #{type_}&quot;</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Synchronize the actual add to protect against concurrent mutation.</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">_internal_add</span>(<span class="ruby-identifier">type_</span>, <span class="ruby-identifier">object_</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add-method -->
+
+    
+      <div id="method-i-categories" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">categories</span><span
+            class="method-args">(arg_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return all the categories for the given object or tuple.</p>
+
+<p>If you pass an Array, it is interpreted as a tuple. If you pass something
+other than an Array or a Hash, it is interpreted as an object. Otherwise,
+you can explicitly specify whether you are passing a tuple or object by
+using hash named arguments, e.g. <code>:tuple =&amp;gt;</code>, or
+<code>:object =&amp;gt;</code>.</p>
+
+<p>The return value is a hash. The keys are the category types relevant to
+this object. The values are the value arrays indicating which category the
+object falls under for each type.</p>
+          
+
+          
+          <div class="method-source-code" id="categories-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 150</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">categories</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-identifier">objdata_</span> = <span class="ruby-identifier">_get_objdata</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">objdata_</span>
+  <span class="ruby-identifier">hash_</span> = {}
+  <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span>, <span class="ruby-identifier">tupcats_</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">tupcats_</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">cat_</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">hash_</span>[<span class="ruby-identifier">cat_</span>] = <span class="ruby-ivar">@categories</span>[<span class="ruby-identifier">cat_</span>][<span class="ruby-value">1</span>].<span class="ruby-identifier">map</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">elem_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tup_</span>[<span class="ruby-identifier">elem_</span>] }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">hash_</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- categories-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- categories-method -->
+
+    
+      <div id="method-i-clear" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">clear</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Clear out all cached objects from the registry.</p>
+          
+
+          
+          <div class="method-source-code" id="clear-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 389</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">clear</span>
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-ivar">@tuples</span>.<span class="ruby-identifier">clear</span>
+    <span class="ruby-ivar">@objects</span>.<span class="ruby-identifier">clear</span>
+    <span class="ruby-ivar">@catdata</span>.<span class="ruby-identifier">clear</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- clear-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- clear-method -->
+
+    
+      <div id="method-i-config" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">config</span><span
+            class="method-args">(&block_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the configuration for this registry.</p>
+
+<p>You may also configure this registry by providing a block. The
+configuration object will then be available as a DSL.</p>
+          
+
+          
+          <div class="method-source-code" id="config-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">config</span>(&amp;<span class="ruby-identifier">block_</span>)
+  <span class="ruby-operator">::</span><span class="ruby-constant">Blockenspiel</span>.<span class="ruby-identifier">invoke</span>(<span class="ruby-identifier">block_</span>, <span class="ruby-ivar">@config</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_</span>
+  <span class="ruby-ivar">@config</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- config-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- config-method -->
+
+    
+      <div id="method-i-delete" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete</span><span
+            class="method-args">(arg_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Delete the given object.</p>
+
+<p>If you pass an Array, it is interpreted as a tuple. If you pass something
+other than an Array or a Hash, it is interpreted as an object. Otherwise,
+you can explicitly specify whether you are passing a tuple or object by
+using hash named arguments, e.g. <code>:tuple =&amp;gt;</code>, or
+<code>:object =&amp;gt;</code>.</p>
+          
+
+          
+          <div class="method-source-code" id="delete-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 288</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">objdata_</span> = <span class="ruby-identifier">_get_objdata</span>(<span class="ruby-identifier">arg_</span>))
+      <span class="ruby-ivar">@objects</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">object_id</span>)
+      <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">each_key</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">_remove_tuple</span>(<span class="ruby-identifier">objdata_</span>, <span class="ruby-identifier">tup_</span>) }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete-method -->
+
+    
+      <div id="method-i-delete_category" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete_category</span><span
+            class="method-args">(category_type_, *category_spec_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Delete all objects in a given category, which is specified by the category
+type and the value array indicating which category of that type.</p>
+          
+
+          
+          <div class="method-source-code" id="delete_category-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 305</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_category</span>(<span class="ruby-identifier">category_type_</span>, *<span class="ruby-identifier">category_spec_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">category_type_</span>)
+    <span class="ruby-identifier">spec_</span> = <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">category_spec_</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">tuple_hash_</span> = (<span class="ruby-ivar">@catdata</span>[<span class="ruby-identifier">category_type_</span>] <span class="ruby-operator">||=</span> {})[<span class="ruby-identifier">spec_</span>])
+      <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-identifier">tuple_hash_</span>.<span class="ruby-identifier">values</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">objdata_</span><span class="ruby-operator">|</span>
+          <span class="ruby-ivar">@objects</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">object_id</span>)
+          <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">each_key</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">_remove_tuple</span>(<span class="ruby-identifier">objdata_</span>, <span class="ruby-identifier">tup_</span>) }
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete_category-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete_category-method -->
+
+    
+      <div id="method-i-get" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get</span><span
+            class="method-args">(tuple_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Retrieve the cached object corresponding to the given tuple. Returns nil if
+the object is not currently cached. Does not attempt to generate the object
+for you.</p>
+          
+
+          
+          <div class="method-source-code" id="get-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 100</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>(<span class="ruby-identifier">tuple_</span>)
+  <span class="ruby-identifier">objdata_</span> = <span class="ruby-ivar">@tuples</span>[<span class="ruby-identifier">tuple_</span>]
+  <span class="ruby-identifier">objdata_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>] <span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get-method -->
+
+    
+      <div id="method-i-include-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">include?</span><span
+            class="method-args">(arg_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if the given object or tuple is present.</p>
+
+<p>If you pass an Array, it is interpreted as a tuple. If you pass something
+other than an Array or a Hash, it is interpreted as an object. Otherwise,
+you can explicitly specify whether you are passing a tuple or object by
+using hash named arguments, e.g. <code>:tuple =&amp;gt;</code>, or
+<code>:object =&amp;gt;</code>.</p>
+          
+
+          
+          <div class="method-source-code" id="include-3F-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 132</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">include?</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-identifier">_get_objdata</span>(<span class="ruby-identifier">arg_</span>) <span class="ruby-operator">?</span> <span class="ruby-keyword">true</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- include-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- include-3F-method -->
+
+    
+      <div id="method-i-lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup</span><span
+            class="method-args">(*args_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the object corresponding to the given tuple. If the tuple is not
+present, the registry tries to generate the object for you. Returns nil if
+it is unable to do so.</p>
+
+<p>You may pass the tuple as a single array argument, or as a set of
+arguments.</p>
+
+<p>If the last argument is a hash, it is removed from the tuple and treated as
+an options hash that may be passed to an object generator block.</p>
+          
+
+          
+          <div class="method-source-code" id="lookup-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 204</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lookup</span>(*<span class="ruby-identifier">args_</span>)
+  <span class="ruby-identifier">opts_</span> = <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">last</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">Hash</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">pop</span> <span class="ruby-operator">:</span> {}
+  <span class="ruby-identifier">tuple_</span> = <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">args_</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">args_</span>
+
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-comment"># Fast-track lookup if it's already there</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">objdata_</span> = <span class="ruby-ivar">@tuples</span>[<span class="ruby-identifier">tuple_</span>])
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>]
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Not there for now. Try to create the object.</span>
+  <span class="ruby-comment"># We want to do this before entering the synchronize block because</span>
+  <span class="ruby-comment"># we don't want callbacks called within the synchronization.</span>
+  <span class="ruby-identifier">obj_</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">type_</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">pattern_</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-ivar">@patterns</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pat_</span>, <span class="ruby-identifier">patdata_</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">Utils</span>.<span class="ruby-identifier">matches?</span>(<span class="ruby-identifier">pat_</span>, <span class="ruby-identifier">tuple_</span>)
+      <span class="ruby-identifier">block_</span> = <span class="ruby-identifier">patdata_</span>[<span class="ruby-value">1</span>]
+      <span class="ruby-identifier">obj_</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">arity</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">0</span> <span class="ruby-keyword">then</span> <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">call</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">1</span> <span class="ruby-keyword">then</span> <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">tuple_</span>)
+        <span class="ruby-keyword">when</span> <span class="ruby-value">2</span> <span class="ruby-keyword">then</span> <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">tuple_</span>, <span class="ruby-keyword">self</span>)
+        <span class="ruby-keyword">else</span> <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">tuple_</span>, <span class="ruby-keyword">self</span>, <span class="ruby-identifier">opts_</span>)
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">unless</span> <span class="ruby-identifier">obj_</span>.<span class="ruby-identifier">nil?</span>
+        <span class="ruby-identifier">pattern_</span> = <span class="ruby-identifier">pat_</span>
+        <span class="ruby-identifier">type_</span> = <span class="ruby-identifier">patdata_</span>[<span class="ruby-value">0</span>]
+        <span class="ruby-keyword">break</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">obj_</span>
+    <span class="ruby-comment"># Now attempt to insert the object.</span>
+    <span class="ruby-comment"># This part is synchronized to protect against concurrent mutation.</span>
+    <span class="ruby-comment"># Once in the synchronize block, we also double-check that no other</span>
+    <span class="ruby-comment"># thread added the object in the meantime. If another thread did,</span>
+    <span class="ruby-comment"># we throw away the object we just created, and return the other</span>
+    <span class="ruby-comment"># thread's object instead.</span>
+    <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">objdata_</span> = <span class="ruby-ivar">@tuples</span>[<span class="ruby-identifier">tuple_</span>])
+        <span class="ruby-identifier">obj_</span> = <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>]
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">_internal_add</span>(<span class="ruby-identifier">type_</span>, <span class="ruby-identifier">obj_</span>, <span class="ruby-identifier">tuple_</span>, <span class="ruby-identifier">pattern_</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">obj_</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lookup-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lookup-method -->
+
+    
+      <div id="method-i-objects_in_category" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">objects_in_category</span><span
+            class="method-args">(category_type_, *category_spec_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return all objects in a given category, which is specified by the category
+type and the value array indicating which category of that type.</p>
+          
+
+          
+          <div class="method-source-code" id="objects_in_category-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 169</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">objects_in_category</span>(<span class="ruby-identifier">category_type_</span>, *<span class="ruby-identifier">category_spec_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">category_type_</span>)
+  <span class="ruby-identifier">spec_</span> = <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">category_spec_</span>
+  <span class="ruby-identifier">tuple_hash_</span> = (<span class="ruby-ivar">@catdata</span>[<span class="ruby-identifier">category_type_</span>] <span class="ruby-operator">||=</span> {})[<span class="ruby-identifier">spec_</span>]
+  <span class="ruby-identifier">tuple_hash_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tuple_hash_</span>.<span class="ruby-identifier">values</span>.<span class="ruby-identifier">map</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">objdata_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>] } <span class="ruby-operator">:</span> []
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- objects_in_category-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- objects_in_category-method -->
+
+    
+      <div id="method-i-rekey" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">rekey</span><span
+            class="method-args">(arg_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Recompute the tuples for the given object, which may be identified by
+object or tuple. Call this when the value of the object changes in such a
+way that the registry should identify it differently.</p>
+
+<p>If you pass an Array, it is interpreted as a tuple. If you pass something
+other than an Array or a Hash, it is interpreted as an object. Otherwise,
+you can explicitly specify whether you are passing a tuple or object by
+using hash named arguments, e.g. <code>:tuple =&amp;gt;</code>, or
+<code>:object =&amp;gt;</code>.</p>
+          
+
+          
+          <div class="method-source-code" id="rekey-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 334</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">rekey</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-comment"># Resolve the object.</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">objdata_</span> = <span class="ruby-identifier">_get_objdata</span>(<span class="ruby-identifier">arg_</span>))
+
+    <span class="ruby-comment"># Look up tuple generators from the type, and determine the</span>
+    <span class="ruby-comment"># new tuples for the object.</span>
+    <span class="ruby-comment"># Do this before entering the synchronize block because we</span>
+    <span class="ruby-comment"># don't want callbacks called within the synchronization.</span>
+    <span class="ruby-identifier">obj_</span> = <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">0</span>]
+    <span class="ruby-identifier">type_</span> = <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">1</span>]
+    <span class="ruby-identifier">new_tuple_list_</span> = []
+    <span class="ruby-ivar">@types</span>[<span class="ruby-identifier">type_</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pat_</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">block_</span> = <span class="ruby-ivar">@patterns</span>[<span class="ruby-identifier">pat_</span>][<span class="ruby-value">2</span>])
+        <span class="ruby-identifier">new_tuple_</span> = <span class="ruby-identifier">block_</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">obj_</span>)
+        <span class="ruby-identifier">new_tuple_list_</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">new_tuple_</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_tuple_</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">ObjectKeyError</span>, <span class="ruby-string">&quot;Not all patterns for this type can generate tuples&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-comment"># Synchronize to protect against concurrent mutation.</span>
+    <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-comment"># One last check to ensure the object is still present</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@objects</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">obj_</span>.<span class="ruby-identifier">object_id</span>)
+        <span class="ruby-comment"># Ensure none of the new tuples isn't pointed elsewhere already.</span>
+        <span class="ruby-comment"># Tuples pointed at this object, ignore them.</span>
+        <span class="ruby-comment"># Tuples pointed at another object, raise an error.</span>
+        <span class="ruby-identifier">tuple_hash_</span> = <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">2</span>]
+        <span class="ruby-identifier">new_tuple_list_</span>.<span class="ruby-identifier">delete_if</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span><span class="ruby-operator">|</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">tuple_hash_</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">tup_</span>)
+            <span class="ruby-keyword">true</span>
+          <span class="ruby-keyword">elsif</span> <span class="ruby-ivar">@tuples</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">tup_</span>)
+            <span class="ruby-identifier">raise</span> <span class="ruby-constant">ObjectKeyError</span>, <span class="ruby-string">&quot;Could not rekey because one of the new tuples is already present&quot;</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-keyword">false</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-comment"># Now go through and edit the tuples</span>
+        (<span class="ruby-identifier">tuple_hash_</span>.<span class="ruby-identifier">keys</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">new_tuple_list_</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">_remove_tuple</span>(<span class="ruby-identifier">objdata_</span>, <span class="ruby-identifier">tup_</span>)
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">new_tuple_list_</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tup_</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">_add_tuple</span>(<span class="ruby-identifier">objdata_</span>, <span class="ruby-identifier">tup_</span>)
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- rekey-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- rekey-method -->
+
+    
+      <div id="method-i-size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">size</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the number of objects cached in the registry.</p>
+          
+
+          
+          <div class="method-source-code" id="size-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">size</span>
+  <span class="ruby-ivar">@objects</span>.<span class="ruby-identifier">size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- size-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- size-method -->
+
+    
+      <div id="method-i-spawn_registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">spawn_registry</span><span
+            class="method-args">(opts_={})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Create a new empty registry, duplicating this registry’s configuration.</p>
+
+<p>If the <code>:unlocked</code> option is set to true, the new registry will
+have an unlocked configuration that can be modified further. Otherwise, the
+new registry’s configuration will be locked.</p>
+
+<p>Spawning a locked registry from a locked configuration is very fast because
+it reuses the configuration objects.</p>
+          
+
+          
+          <div class="method-source-code" id="spawn_registry-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 84</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn_registry</span>(<span class="ruby-identifier">opts_</span>={})
+  <span class="ruby-identifier">config</span>.<span class="ruby-identifier">spawn_registry</span>(<span class="ruby-identifier">opts_</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- spawn_registry-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- spawn_registry-method -->
+
+    
+      <div id="method-i-tuples_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tuples_for</span><span
+            class="method-args">(arg_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns an array of all tuples corresponding to the given object, or the
+object identified by the given tuple. Returns nil if the given object is
+not cached in the registry.</p>
+
+<p>If you pass an Array, it is interpreted as a tuple. If you pass something
+other than an Array or a Hash, it is interpreted as an object. Otherwise,
+you can explicitly specify whether you are passing a tuple or object by
+using hash named arguments, e.g. <code>:tuple =&amp;gt;</code>, or
+<code>:object =&amp;gt;</code>.</p>
+          
+
+          
+          <div class="method-source-code" id="tuples_for-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 117</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tuples_for</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-identifier">objdata_</span> = <span class="ruby-identifier">_get_objdata</span>(<span class="ruby-identifier">arg_</span>)
+  <span class="ruby-identifier">objdata_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">objdata_</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">keys</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- tuples_for-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- tuples_for-method -->
+
+    
+      <div id="method-i-tuples_in_category" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tuples_in_category</span><span
+            class="method-args">(category_type_, *category_spec_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return all tuples in a given category, which is specified by the category
+type and the value array indicating which category of that type.</p>
+          
+
+          
+          <div class="method-source-code" id="tuples_in_category-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/registry.rb, line 183</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tuples_in_category</span>(<span class="ruby-identifier">category_type_</span>, *<span class="ruby-identifier">category_spec_</span>)
+  <span class="ruby-ivar">@config</span>.<span class="ruby-identifier">lock</span>
+
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@categories</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">category_type_</span>)
+  <span class="ruby-identifier">spec_</span> = <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">category_spec_</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">category_spec_</span>
+  <span class="ruby-identifier">tuple_hash_</span> = (<span class="ruby-ivar">@catdata</span>[<span class="ruby-identifier">category_type_</span>] <span class="ruby-operator">||=</span> {})[<span class="ruby-identifier">spec_</span>]
+  <span class="ruby-identifier">tuple_hash_</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tuple_hash_</span>.<span class="ruby-identifier">keys</span> <span class="ruby-operator">:</span> []
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- tuples_in_category-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- tuples_in_category-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

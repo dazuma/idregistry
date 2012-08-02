@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class IDRegistry::Railtie::Configuration - IDRegistry 0.1.0 Documentation</title>
+
+<link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../index.html">Home</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/idregistry/railtie.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Object
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-clear_registry">#clear_registry</a>
+    
+    <li><a href="#method-i-spawn_registry">#spawn_registry</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../History_rdoc.html">History</a>
+  
+    <li class="file"><a href="../../IDRegistry_rdoc.html">IDRegistry</a>
+  
+    <li class="file"><a href="../../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../IDRegistry.html">IDRegistry</a>
+  
+    <li><a href="../../IDRegistry/Configuration.html">IDRegistry::Configuration</a>
+  
+    <li><a href="../../IDRegistry/Configuration/AnonymousType.html">IDRegistry::Configuration::AnonymousType</a>
+  
+    <li><a href="../../IDRegistry/ConfigurationLockedError.html">IDRegistry::ConfigurationLockedError</a>
+  
+    <li><a href="../../IDRegistry/IDRegistryError.html">IDRegistry::IDRegistryError</a>
+  
+    <li><a href="../../IDRegistry/IllegalConfigurationError.html">IDRegistry::IllegalConfigurationError</a>
+  
+    <li><a href="../../IDRegistry/ObjectKeyError.html">IDRegistry::ObjectKeyError</a>
+  
+    <li><a href="../../IDRegistry/PatternAdder.html">IDRegistry::PatternAdder</a>
+  
+    <li><a href="../../IDRegistry/Railtie.html">IDRegistry::Railtie</a>
+  
+    <li><a href="../../IDRegistry/Railtie/Configuration.html">IDRegistry::Railtie::Configuration</a>
+  
+    <li><a href="../../IDRegistry/Registry.html">IDRegistry::Registry</a>
+  
+    <li><a href="../../IDRegistry/RegistryMiddleware.html">IDRegistry::RegistryMiddleware</a>
+  
+    <li><a href="../../IDRegistry/RegistryMiddleware/ClearRegistry.html">IDRegistry::RegistryMiddleware::ClearRegistry</a>
+  
+    <li><a href="../../IDRegistry/RegistryMiddleware/SpawnRegistry.html">IDRegistry::RegistryMiddleware::SpawnRegistry</a>
+  
+    <li><a href="../../IDRegistry/Utils.html">IDRegistry::Utils</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class IDRegistry::Railtie::Configuration</h1>
+
+  <div id="description" class="description">
+    
+<p><a href="Configuration.html">Configuration</a> options. These are methods
+on config.idregistry.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <!-- Attributes -->
+    <section id="attribute-method-details" class="method-section section">
+      <h3 class="section-header">Attributes</h3>
+
+      
+      <div id="attribute-i-before_middleware" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">before_middleware</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Middleware to run before, or nil to run the middleware toward the end</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-tasks" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">tasks</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Array of registry tasks</p>
+        
+        </div>
+      </div>
+      
+    </section><!-- attribute-method-details -->
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-clear_registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">clear_registry</span><span
+            class="method-args">(reg_, &condition_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Set up the middleware to clear the given registry after each request.</p>
+
+<p>If you provide the optional block, it is called and passed the Rack
+environment. The registry is cleared only if the block returns a true
+value. If no block is provided, the registry is always cleared at the end
+of a request.</p>
+          
+
+          
+          <div class="method-source-code" id="clear_registry-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 86</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">clear_registry</span>(<span class="ruby-identifier">reg_</span>, &amp;<span class="ruby-identifier">condition_</span>)
+  <span class="ruby-ivar">@tasks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RegistryMiddleware</span><span class="ruby-operator">::</span><span class="ruby-constant">ClearRegistry</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">reg_</span>, &amp;<span class="ruby-identifier">condition_</span>)
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- clear_registry-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- clear_registry-method -->
+
+    
+      <div id="method-i-spawn_registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">spawn_registry</span><span
+            class="method-args">(template_, envkey_)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Set up the middleware to spawn a new registry on each request, using the
+given locked configuration as a template. The new registry is stored in the
+Rack environment with the given key. It is cleaned and disposed at the end
+of the request.</p>
+          
+
+          
+          <div class="method-source-code" id="spawn_registry-source">
+            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn_registry</span>(<span class="ruby-identifier">template_</span>, <span class="ruby-identifier">envkey_</span>)
+  <span class="ruby-ivar">@tasks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RegistryMiddleware</span><span class="ruby-operator">::</span><span class="ruby-constant">SpawnRegistry</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">template_</span>, <span class="ruby-identifier">envkey_</span>)
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- spawn_registry-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- spawn_registry-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+
