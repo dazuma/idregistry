@@ -144,7 +144,7 @@ module IDRegistry
     # <tt>:tuple =&gt;</tt>, or <tt>:object =&gt;</tt>.
     #
     # The return value is a hash. The keys are the category types
-    # relevant to this object. The values are the index arrays
+    # relevant to this object. The values are the value arrays
     # indicating which category the object falls under for each type.
 
     def categories(arg_)
@@ -163,27 +163,29 @@ module IDRegistry
 
 
     # Return all objects in a given category, which is specified by the
-    # category type and the index array indicating which category of that
+    # category type and the value array indicating which category of that
     # type.
 
-    def objects_in_category(category_, index_)
+    def objects_in_category(category_type_, *category_spec_)
       @config.lock
 
-      return nil unless @categories.include?(category_)
-      tuple_hash_ = (@catdata[category_] ||= {})[index_]
+      return nil unless @categories.include?(category_type_)
+      spec_ = category_spec_.size == 1 && category_spec_.first.is_a?(::Array) ? category_spec_.first : category_spec_
+      tuple_hash_ = (@catdata[category_type_] ||= {})[spec_]
       tuple_hash_ ? tuple_hash_.values.map{ |objdata_| objdata_[0] } : []
     end
 
 
     # Return all tuples in a given category, which is specified by the
-    # category type and the index array indicating which category of that
+    # category type and the value array indicating which category of that
     # type.
 
-    def tuples_in_category(category_, index_)
+    def tuples_in_category(category_type_, *category_spec_)
       @config.lock
 
-      return nil unless @categories.include?(category_)
-      tuple_hash_ = (@catdata[category_] ||= {})[index_]
+      return nil unless @categories.include?(category_type_)
+      spec_ = category_spec_.size == 1 && category_spec_.first.is_a?(::Array) ? category_spec_.first : category_spec_
+      tuple_hash_ = (@catdata[category_type_] ||= {})[spec_]
       tuple_hash_ ? tuple_hash_.keys : []
     end
 
@@ -215,8 +217,9 @@ module IDRegistry
       # we don't want callbacks called within the synchronization.
       obj_ = nil
       type_ = nil
-      @patterns.each do |pattern_, patdata_|
-        if Utils.matches?(pattern_, tuple_)
+      pattern_ = nil
+      @patterns.each do |pat_, patdata_|
+        if Utils.matches?(pat_, tuple_)
           block_ = patdata_[1]
           obj_ = case block_.arity
             when 0 then block_.call
@@ -225,6 +228,7 @@ module IDRegistry
             else block_.call(tuple_, self, opts_)
           end
           unless obj_.nil?
+            pattern_ = pat_
             type_ = patdata_[0]
             break
           end
@@ -242,7 +246,7 @@ module IDRegistry
           if (objdata_ = @tuples[tuple_])
             obj_ = objdata_[0]
           else
-            _internal_add(type_, obj_, tuple_)
+            _internal_add(type_, obj_, tuple_, pattern_)
           end
         end
       end
@@ -266,7 +270,7 @@ module IDRegistry
 
       # Synchronize the actual add to protect against concurrent mutation.
       @mutex.synchronize do
-        _internal_add(type_, object_, nil)
+        _internal_add(type_, object_, nil, nil)
       end
       self
     end
@@ -295,14 +299,15 @@ module IDRegistry
 
 
     # Delete all objects in a given category, which is specified by the
-    # category type and the index array indicating which category of that
+    # category type and the value array indicating which category of that
     # type.
 
-    def delete_category(category_, index_)
+    def delete_category(category_type_, *category_spec_)
       @config.lock
 
-      if @categories.include?(category_)
-        if (tuple_hash_ = (@catdata[category_] ||= {})[index_])
+      if @categories.include?(category_type_)
+        spec_ = category_spec_.size == 1 && category_spec_.first.is_a?(::Array) ? category_spec_.first : category_spec_
+        if (tuple_hash_ = (@catdata[category_type_] ||= {})[spec_])
           @mutex.synchronize do
             tuple_hash_.values.each do |objdata_|
               @objects.delete(objdata_[0].object_id)
@@ -427,6 +432,13 @@ module IDRegistry
     end
 
 
+    # Make sure respond_to does the right thing for convenience methods
+
+    def respond_to?(name_)  # :nodoc:
+      super || @methods.include?(name_.to_sym)
+    end
+
+
     # Internal method that gets an object data array given an object
     # specification.
 
@@ -451,8 +463,11 @@ module IDRegistry
 
     # Internal add method.
     # This needs to be called within synchronization.
+    # The tuple and pattern arguments are for cases where we are adding
+    # because of a specific tuple lookup. We use that tuple for that
+    # pattern if the configuration doesn't generate a different tuple.
 
-    def _internal_add(type_, obj_, tuple_)  # :nodoc:
+    def _internal_add(type_, obj_, tuple_, pattern_)  # :nodoc:
       # Check if this object is present already.
       if (objdata_ = @objects[obj_.object_id])
         # The object is present already. If it has the right type,
@@ -468,8 +483,11 @@ module IDRegistry
         tuple_list_ = []
         @types[type_].each do |pat_|
           if (block_ = @patterns[pat_][2])
-            tup_ = block_.call(obj_) || tuple_
+            tup_ = block_.call(obj_)
           else
+            tup_ = nil
+          end
+          if !tup_ && pat_ == pattern_
             tup_ = tuple_
           end
           if tup_

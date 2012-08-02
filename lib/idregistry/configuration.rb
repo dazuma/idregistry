@@ -348,7 +348,7 @@ module IDRegistry
     # into the pattern that indicates which tuple element(s) will
     # identify individual categories within this category type.
 
-    def add_category(category_, pattern_, indexes_)
+    def add_category(category_, pattern_, indexes_=[])
       @mutex.synchronize do
         raise ConfigurationLockedError if @locked
         if @categories.has_key?(category_)

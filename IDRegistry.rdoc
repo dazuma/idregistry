@@ -20,15 +20,13 @@ A common practice is to use database primary keys as the unique identifiers for 
 
 IDRegistry uses arrays, or <i>tuples</i> as we will call them, as unique identifiers. This allows us to support a wide variety of identification strategies. A simple example is to employ a two-element tuple: the first element being a type indicator, and the second being a database primary key. For example, suppose your application had two types of entities: users and blog posts. Your user objects could employ unique identifiers of the form <tt>[:user, <i>user-id</i>]</tt>, and your post objects could employ identifiers of the form <tt>[:post, <i>post-id</i>]</tt>. So the tuple <tt>[:user, 1]</tt> identifies the user with ID 1, and the tuple <tt>[:post, 210]</tt> identifies the post with ID 210.
 
-Such "forms" of tuples that correspond to "types" of objects, we denote as <i>patterns</i>. A pattern is an array like a tuple, but some of its elements are types rather than values. For example, <tt>[:user, 1]</tt> is a tuple that identifies the particular user with ID 1, while <tt>[:user, Integer]</tt> is the pattern followed by user identifiers. Similarly, <tt>[:post, Integer]</tt> is the pattern followed by blog post identifiers.
+Such "forms" of tuples that correspond to "types" of objects, we denote as <i>patterns</i>. A pattern is an array like a tuple, but some of its elements are placeholders rather than values. For example, <tt>[:user, 1]</tt> is a tuple that identifies the particular user with ID 1, while <tt>[:user, Integer]</tt> is the pattern followed by user identifiers. The <tt>Integer</tt> element is a placeholder that matches certain kinds of values---in this case, integer IDs. Similarly, <tt>[:post, Integer]</tt> is the pattern followed by blog post identifiers.
 
-Technically, in IDRegistry, a "type" element in a pattern can be any object that responds appropriately to the === operator. In most cases, these will be class or module objects (such as <tt>Integer</tt> above). However, patterns can utilize regular expressions, or any other object that classifies based on the === operator.
+It is also common to use <tt>String</tt> as a placeholder element used in patterns. For example, if you have contacts that should be identified by a unique phone number, you could use tuples with the pattern <tt>[:contact, String]</tt> where the unique phone number is represented as a string.
 
-Tuples (and patterns) can be longer and more complex than the two-element examples above. Here are a few more examples.
+Indeed, technically, a placeholder element can be any object that responds appropriately to the === operator. In most cases, these will be class or module objects such as <tt>Integer</tt> or <tt>String</tt> above; however, patterns can utilize regular expressions, or any other object that classifies based on the === operator.
 
-Suppose you have a tree of node objects, each uniquely identified by a parent node and a child name. You might structure your identifiers according to the pattern <tt>[:tree, TreeNode, String]</tt>.
-
-Suppose you have objects that represent relationships between users in a social network. Each relationship would be identified by the user IDs of the two users involved. You might structure your identifiers according to the pattern <tt>[:relationship, Integer, Integer]</tt>. For this case, you might need to decide whether <tt>[:relationship, 1, 2]</tt> and <tt>[:relationship, 2, 1]</tt> should refer to the same or different objects in your application. If they should refer to the same object, you should pre-filter your tuples so that, for example, the first user ID is always the smaller.
+Additionally, tuples (and patterns) can be longer and more complex than the two-element examples above. Suppose you have objects that represent relationships between users in a social network. Each relationship might be identified by the two user IDs of the users involved. Correspondingly, your identifier tuples might follow the pattern <tt>[:relationship, Integer, Integer]</tt>.
 
 == Basic IDRegistry usage
 
@@ -62,52 +60,103 @@ If you want to clear the cache and force the registry to construct new objects, 
 
 == Multiple identifiers for an object
 
-Sometimes there will be several different mechanisms for identifying an object to procure. Consider a tree stored in the database. Each node might have a database primary key, so you could identify objects using the pattern <tt>[:node, Integer]</tt>. However, you might also want to navigate from parent to child by child name, using a pattern such as <tt>[:node, Integer, String]</tt> similar to the tree example we covered earlier. That is, conceptually, we might want to have these two ways of obtaining an object in the tree:
+Sometimes there will be several different mechanisms for identifying an object to procure. Consider a tree stored in the database, in which each node has a name that is unique among its siblings. Now, each node might have a database primary key, so you could identify objects using the pattern <tt>[:node, Integer]</tt>. However, since the combination of parent and name is unique, you could also uniquely identify objects using that combination: <tt>[:node, Integer, String]</tt> for parent ID and child name. These two patterns represent two different ways of looking up a tree node:
 
  object = find_tree_node_id(id)
  object = find_tree_from_parent_id_and_child_name(parent_id, child_name)
 
 These two ways to lookup the object correspond to two different tuples---two different unique identifiers. In a simple Identity Map, this would not work. It might create an object using the first identifier, and then create a second object using the second identifier, even if semantically they should be the same object.
 
-IDRegistry, however, supports this case by giving you the ability to connect multiple patterns and associate them with the same object type. Here's how.
+IDRegistry, however, supports this case by giving you the ability to define multiple patterns and associate them with the same object type. Here's how.
 
  my_registry.config do |config|
    config.add_pattern do |pattern|
-     pattern.type :tree
-     pattern.pattern [:tree, Integer]
+     pattern.type :treenode
+     pattern.pattern [:node, Integer]
      pattern.to_generate_object do |tuple|
        find_tree_node_id(tuple[1])
      end
      pattern.to_generate_tuple do |obj|
-       [:user, obj.id]
+       [:node, obj.id]
      end
    end
    config.add_pattern do |pattern|
-     pattern.type :tree
-     pattern.pattern [:tree, Integer, String]
+     pattern.type :treenode
+     pattern.pattern [:node, Integer, String]
      pattern.to_generate_object do |tuple|
        find_tree_from_parent_id_and_child_name(tuple[1], tuple[2])
      end
      pattern.to_generate_tuple do |obj|
-       [:user, obj.parent_id, obj.name]
+       [:node, obj.parent_id, obj.name]
      end
    end
  end
 
-Let's unpack this. First, notice that we are now specifying a "type" for each pattern. The type is a name for this type of object. If you omit it (as we did earlier), IDRegistry automatically generates a new anonymous type for each pattern that you add. In this case, however, we set it explicitly. This lets us specify that both patterns describe the same type of object, a tree node object. Each tree node will now have TWO identifiers, one of each pattern. So doing a lookup for either identifiers will return the same object.
+Let's unpack this. First, notice that we are now specifying a "type" for each pattern. The type is a name for this type of object. If you omit it (as we did earlier), IDRegistry treats each pattern as a separate anonymous type. In this case, however, we set it explicitly. This lets us specify that both patterns describe the same type of object, a tree node object. Each tree node will now have TWO identifiers, one of each pattern. Doing a lookup for either identifiers will return the same object.
 
 Second, now in addition to the <tt>to_generate_object</tt> block, we now provide a <tt>to_generate_tuple</tt> block. We need to tell IDRegistry how to generate a tuple (identifier) from an object. Why?
 
 Well, suppose were were to look up a tree node by ID:
 
- node = my_registry.lookup(:tree, 10)
+ # Look up a node by database ID
+ node = my_registry.lookup(:node, 10)
 
-At this point, IDRegistry can cache the object and associate it with the tuple <tt>[:tree, 1]</tt> so that you can look it up using that tuple again. It also knows that the object can have a tuple with the pattern <tt>[:tree, Integer, String]</tt>, but it doesn't know what that tuple actually is. It needs for you to provide a way to generate that other tuple. Similarly, if you originally looked up the tree node by parent ID and name, IDRegistry needs you to teach it how to generate the corresponding simple ID tuple.
+At this point, IDRegistry can cache the object and associate it with the tuple <tt>[:node, 10]</tt> so that you can look it up using that tuple again. However, that object also has a parent and a name (suppose the parent ID is 9 and the name is "foo"). This means we would like to be able to look up that _same_ object using the tuple <tt>[:node, 9, "foo"]</tt>.
 
- # Returns the same object as the original node
- node1 = my_registry.lookup(:tree, node.parent_id, node.name)
+ # Should the same object as the original node
+ node1 = my_registry.lookup(:node, node.parent_id, node.name)
+
+IDRegistry therefore needs you to teach it how to generate that other tuple for the object. Similarly, if you originally looked up the tree node by parent ID and name, IDRegistry needs you to teach it how to generate the corresponding simple ID tuple.
 
 So to summarize... if you have only one way to look up an object, you can simply specify the pattern and a <tt>to_generate_object</tt> block. For objects that can be looked up in more than one way, you should also include a type, to connect the various patterns together, and a <tt>to_generate_tuple</tt> block, which tells IDRegistry how to generate missing tuples.
+
+== Categories
+
+Identity maps generally support one-to-one correspondence between objects and unique identifiers. We have already seen how IDRegistry can support multiple identifiers for an object, for object types that require multiple modes of lookup. In this section, we cover categories, which are special identifiers that can reference zero, one, or multiple objects that are already present in the identity map. IDRegistry can look up the collection of objects that match a given category, or use categories to delete groups of objects out of the identity map quickly.
+
+We'll cover an example. Take the "tree node" object type that we covered earlier. One of the patterns for a tree node identifies the node by parent ID and child name: <tt>[:tree, Integer, String]</tt>. This pattern lets us look up a _specific_ child of a given node. However, suppose we want _all_ the children (that have been loaded into the identity map so far) of a given parent. Somehow, we want to provide a specific parent ID, but a wildcard for the name.
+
+That is how categories are defined. We start with an identifier pattern such as our example <tt>[:tree, Integer, String]</tt>. Now we choose some number (zero or more) of the placeholder elements that we want to _specify_. In this example, we want to specify the parent ID, so we choose array index 1, which is the parent ID in our pattern. We call this sequence of element indexes the "category indexes". In this case, the category indexes are <tt>[1]</tt>. The rest of the placeholders (in our example, array index 2, the child name) will be treated as wildcards.
+
+To define such a category, provide a name, a pattern for identifiers, and an array of category indexes, in the registry's configuration as follows:
+
+ my_registry.config do |config|
+   add_category(:node_parent, [:tree, Integer, String], [1])
+ end
+
+Note that what we've done here is create a _class_ of categories---specifically, the class of categories that include the children of given parent nodes. In order to specify a _particular_ category, we must say _which_ parent node. To do that, we take each of the indexes in the category index array (currently just one) and we assign each a particular value. In our example, suppose we want to specify the particular category with parent ID 9. We assign the value 9 to the first and only category index, and we get the array <tt>[9]</tt>. This new array is what we call the "category spec". It specifies a particular category out of our class, in this case, the category of tree nodes whose parent ID is 9.
+
+To look up nodes by category, for example, you must provide the name of the class of categories, and the category spec indicating which particular category.
+
+ objects = my_registry.objects_in_category(:node_parent, [9])
+
+There are many different ways to specify categories. Sometimes you want a single "one-off" category that isn't part of a class of categories. For example, you could define a category that includes ALL tree node objects like this:
+
+ my_registry.config do |config|
+   add_category(:all_nodes, [:tree, Integer, String], [])
+ end
+
+Note that we set the same pattern but now we have no category indexes. This means, we are not going to specify any parameters in order to identify a particular category. Instead, both parent ID and name string are wildcards, and all tree nodes will fall into the same category. This is still a "class" of categories, but a degenerate one with no parameters. When we want to look up the objects, our category spec is similarly the empty array, since we have no category indexes for which to provide values.
+
+ objects = my_registry.objects_in_category(:all_nodes, [])
+
+Some classes of categories may be parameterized by multiple elements. For example, if we set up a category like this:
+
+ my_registry.config do |config|
+   add_category(:parent_and_name, [:tree, Integer, String], [1, 2])
+ end
+
+Now our category is parameterized by both parent and name. This isn't a very useful class of categories since each will contain at most one element. I show it merely to illustrate that you can have multiple category indexes. So here's how to get all the objects in the "category of objects with parent ID 9 and name foo":
+
+ objects = my_registry.objects_in_category(:parent_and_name, [9, "foo"])
+
+Finally, here is one more example. Suppose you did this:
+
+ my_registry.config do |config|
+   add_category(:named_foo, [:tree, Integer, 'foo'], [])
+ end
+
+Notice that we've replaced the "child name" placeholder with a particular ID. That element is no longer a placeholder, but a specific value. This is now a one-off category (i.e. a degenerate class of categories with no parameters) of objects whose name is "foo". The pattern that you use to define a category doesn't have to be exactly one of the patterns that you use to define an object type. It just has to match actual identifier tuples in your registry.
 
 == Web requests
 
@@ -119,21 +168,13 @@ If you are running multithreaded, then you will need multiple registries, one fo
 
 == Thread safety
 
-IDRegistry is fully thread safe. All the configuration and object lookup and manipulation methods, are always re-entrant and can be called concurrently from multiple threads. Access to critical sections will be serialized internally.
+IDRegistry is fully thread safe. All object lookup and manipulation methods, as well as configuration methods, are re-entrant and can be called concurrently from multiple threads. The desired invariant, that a registry will contain at most one copy of any given object, will be maintained.
 
-There is, however, one caveat that has to do with the callbacks for constructing objects or generating tuples. IDRegistry does not include callbacks within a critical section. This means it is possible, in a multi-threaded environment, for a callback to be called but its result to be discarded. Here is the scenario:
+There is, however, one caveat that has to do with the callbacks for constructing objects or generating tuples. IDRegistry does not include those callbacks within its critical sections. (To do so would invite deadlocks.) Instead, we run callbacks eagerly and serialize later on insertion. This means it is possible, in a multi-threaded environment, for a callback to be called but its result to be discarded. Here is the scenario:
 
 * Two threads simultaneously call Registry#lookup for the same tuple that is not already present in the identity map.
-* Both threads check for the tuple and determine that it is not present.
-* Both threads then call the callback to create the object. Both object creations happen concurrently. Two objects have now been created. IDRegistry does not put any mutual exclusion on object creation.
-* However, only one of the two objects will actually be used. Whichever thread actually finishes creating the object first, will be able to store that object in the identity map and return that object. The other slower thread will throw away the object it created, and instead return the object that the first thread created.
+* Within IDRegistry, both threads check for the tuple and determine that it is not present.
+* Both threads then call the callback to create the object. Because IDRegistry does not put any mutual exclusion on callbacks, they execute concurrently and create two separate objects.
+* However, only one of the two objects will actually be used. IDRegistry will use the object created by whichever thread finishes first, and throw away the object created by the slower thread. Both threads will return the same object, the first thread's copy, from the call.
 
-Therefore, our desired behavior still holds. Only one copy of the object actually ends up used in the system. However, it is possible, in a multi-threaded environment, for IDRegistry to ask for an object to be created but not actually use it.
-
-== Categories
-
-(...to be written...)
-
-== Convenience methods
-
-(...to be written...)
+Therefore, our desired behavior still holds; however, you should be aware that it is possible for more than one copy of an object to have been created in the interim.
