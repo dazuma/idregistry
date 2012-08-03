@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>class IDRegistry::Railtie::Configuration - IDRegistry 0.1.0 Documentation</title>
+<title>class IDRegistry::Railtie::Configuration - IDRegistry 0.1.2 Documentation</title>
 
 <link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
 
@@ -200,7 +200,7 @@ on config.idregistry.</p>
         
         <div class="method-heading">
           <span class="method-name">clear_registry</span><span
-            class="method-args">(reg_, &condition_)</span>
+            class="method-args">(reg_, opts_={}, &condition_)</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
         
@@ -213,13 +213,17 @@ on config.idregistry.</p>
 environment. The registry is cleared only if the block returns a true
 value. If no block is provided, the registry is always cleared at the end
 of a request.</p>
+
+<p>If you set the <code>:before_request</code> option to true, the registry
+clearing will take place at the beginning of the request rather than the
+end.</p>
           
 
           
           <div class="method-source-code" id="clear_registry-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 86</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">clear_registry</span>(<span class="ruby-identifier">reg_</span>, &amp;<span class="ruby-identifier">condition_</span>)
-  <span class="ruby-ivar">@tasks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RegistryMiddleware</span><span class="ruby-operator">::</span><span class="ruby-constant">ClearRegistry</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">reg_</span>, &amp;<span class="ruby-identifier">condition_</span>)
+            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 90</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">clear_registry</span>(<span class="ruby-identifier">reg_</span>, <span class="ruby-identifier">opts_</span>={}, &amp;<span class="ruby-identifier">condition_</span>)
+  <span class="ruby-ivar">@tasks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RegistryMiddleware</span><span class="ruby-operator">::</span><span class="ruby-constant">ClearRegistry</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">reg_</span>, <span class="ruby-identifier">opts_</span>, &amp;<span class="ruby-identifier">condition_</span>)
   <span class="ruby-keyword">self</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- clear_registry-source -->
@@ -251,7 +255,7 @@ of the request.</p>
 
           
           <div class="method-source-code" id="spawn_registry-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 97</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/railtie.rb, line 101</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn_registry</span>(<span class="ruby-identifier">template_</span>, <span class="ruby-identifier">envkey_</span>)
   <span class="ruby-ivar">@tasks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RegistryMiddleware</span><span class="ruby-operator">::</span><span class="ruby-constant">SpawnRegistry</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">template_</span>, <span class="ruby-identifier">envkey_</span>)
   <span class="ruby-keyword">self</span>

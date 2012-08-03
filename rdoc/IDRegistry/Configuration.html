@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>class IDRegistry::Configuration - IDRegistry 0.1.0 Documentation</title>
+<title>class IDRegistry::Configuration - IDRegistry 0.1.2 Documentation</title>
 
 <link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
 
@@ -242,7 +242,7 @@ within this category type.</p>
 
           
           <div class="method-source-code" id="add_category-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 351</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 347</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_category</span>(<span class="ruby-identifier">category_</span>, <span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>=[])
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -284,7 +284,7 @@ to be looked up.</p>
 
           
           <div class="method-source-code" id="add_convenience_method-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 381</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 377</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_convenience_method</span>(<span class="ruby-identifier">name_</span>, <span class="ruby-identifier">pattern_</span>, <span class="ruby-identifier">indexes_</span>)
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -328,10 +328,6 @@ that pattern.</p>
 <dd>
 <p>Add a simple pattern, using the given proc to generate objects matching
 that pattern.</p>
-</dd><dt><code>add_pattern( <em>pattern</em>, <em>to_generate_object</em>, <em>to_generate_tuple</em> )</code>
-<dd>
-<p>Add a simple pattern, using the given proc to generate objects matching
-that pattern, and to generate a tuple from an object.</p>
 </dd><dt><code>add_pattern( <em>pattern</em>, <em>type</em>, <em>to_generate_object</em>, <em>to_generate_tuple</em> )</code>
 <dd>
 <p>Add a pattern for the given type. You should provide both a proc to
@@ -345,7 +341,7 @@ pattern.</p>
 
           
           <div class="method-source-code" id="add_pattern-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 274</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 270</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_pattern</span>(*<span class="ruby-identifier">args_</span>, &amp;<span class="ruby-identifier">block_</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_</span>
@@ -544,7 +540,7 @@ categories, and convenience methods.</p>
 
           
           <div class="method-source-code" id="clear-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 408</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 404</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">clear</span>
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -581,7 +577,7 @@ categories, and convenience methods.</p>
 
           
           <div class="method-source-code" id="delete_category-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 365</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 361</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_category</span>(<span class="ruby-identifier">category_</span>)
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -615,7 +611,7 @@ categories, and convenience methods.</p>
 
           
           <div class="method-source-code" id="delete_convenience_method-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 396</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 392</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_convenience_method</span>(<span class="ruby-identifier">name_</span>)
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -650,7 +646,7 @@ object type if this is the object type’s only remaining pattern.</p>
 
           
           <div class="method-source-code" id="delete_pattern-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 316</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 312</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_pattern</span>(<span class="ruby-identifier">pattern_</span>)
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>
@@ -690,7 +686,7 @@ all patterns associated with this object type.</p>
 
           
           <div class="method-source-code" id="delete_type-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 333</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/configuration.rb, line 329</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_type</span>(<span class="ruby-identifier">type_</span>)
   <span class="ruby-ivar">@mutex</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigurationLockedError</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@locked</span>

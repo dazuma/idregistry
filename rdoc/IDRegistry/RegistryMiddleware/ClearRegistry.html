@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>class IDRegistry::RegistryMiddleware::ClearRegistry - IDRegistry 0.1.0 Documentation</title>
+<title>class IDRegistry::RegistryMiddleware::ClearRegistry - IDRegistry 0.1.2 Documentation</title>
 
 <link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
 
@@ -172,7 +172,7 @@ no condition block is provided, the registry is always cleared.</p>
         
         <div class="method-heading">
           <span class="method-name">new</span><span
-            class="method-args">(registry_, &condition_)</span>
+            class="method-args">(registry_, opts_={}, &condition_)</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
         
@@ -180,15 +180,18 @@ no condition block is provided, the registry is always cleared.</p>
         <div class="method-description">
           
           <p>Create a new <a href="ClearRegistry.html">ClearRegistry</a> task. You must
-provide the registry and an optional condition block.</p>
+provide the registry and an optional condition block. If you set the
+<code>:before_request</code> option to true, the registry clearing will
+take place at the beginning of the request rather than the end.</p>
           
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 64</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">registry_</span>, &amp;<span class="ruby-identifier">condition_</span>)
+            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">registry_</span>, <span class="ruby-identifier">opts_</span>={}, &amp;<span class="ruby-identifier">condition_</span>)
   <span class="ruby-ivar">@condition</span> = <span class="ruby-identifier">condition_</span>
   <span class="ruby-ivar">@registry</span> = <span class="ruby-identifier">registry_</span>
+  <span class="ruby-ivar">@before</span> = <span class="ruby-identifier">opts_</span>[<span class="ruby-value">:before_request</span>]
 <span class="ruby-keyword">end</span></pre>
           </div><!-- new-source -->
           
@@ -217,15 +220,14 @@ provide the registry and an optional condition block.</p>
 
         <div class="method-description">
           
-          <p>The post method for this task clears the registry if the condition block
-passes</p>
+          <p>The pre method applies if <code>:before_request</code> is not set.</p>
           
 
           
           <div class="method-source-code" id="post-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 75</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 81</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post</span>(<span class="ruby-identifier">env_</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@condition</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@condition</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">env_</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@before</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-operator">!</span><span class="ruby-ivar">@condition</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@condition</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">env_</span>))
     <span class="ruby-ivar">@registry</span>.<span class="ruby-identifier">clear</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -250,13 +252,16 @@ passes</p>
 
         <div class="method-description">
           
-          <p>The pre method for this task does nothing.</p>
+          <p>The pre method applies if <code>:before_request</code> is set.</p>
           
 
           
           <div class="method-source-code" id="pre-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 70</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 74</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">pre</span>(<span class="ruby-identifier">env_</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@before</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-operator">!</span><span class="ruby-ivar">@condition</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@condition</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">env_</span>))
+    <span class="ruby-ivar">@registry</span>.<span class="ruby-identifier">clear</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- pre-source -->
           

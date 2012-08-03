@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>class IDRegistry::RegistryMiddleware - IDRegistry 0.1.0 Documentation</title>
+<title>class IDRegistry::RegistryMiddleware - IDRegistry 0.1.2 Documentation</title>
 
 <link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
 
@@ -188,7 +188,7 @@ hash.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 123</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 129</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">app_</span>, <span class="ruby-identifier">tasks_</span>=[], <span class="ruby-identifier">opts_</span>={})
   <span class="ruby-ivar">@app</span> = <span class="ruby-identifier">app_</span>
   <span class="ruby-ivar">@tasks</span> = <span class="ruby-identifier">tasks_</span>
@@ -225,7 +225,7 @@ hash.</p>
 
           
           <div class="method-source-code" id="call-source">
-            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 131</span>
+            <pre><span class="ruby-comment"># File lib/idregistry/middleware.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">call</span>(<span class="ruby-identifier">env_</span>)
   <span class="ruby-keyword">begin</span>
     <span class="ruby-ivar">@tasks</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">task_</span><span class="ruby-operator">|</span> <span class="ruby-identifier">task_</span>.<span class="ruby-identifier">pre</span>(<span class="ruby-identifier">env_</span>) }
