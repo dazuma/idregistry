@@ -77,6 +77,7 @@ module IDRegistry
         @registry.lookup(:hello, 1)
         assert_equal(1, @registry.size)
         task_.pre({})
+        assert_equal(1, @registry.size)
         task_.post({})
         assert_equal(0, @registry.size)
       end
@@ -93,6 +94,17 @@ module IDRegistry
         assert_equal(1, @registry.size)
         task_.pre({:foo => :bar})
         task_.post({:foo => :bar})
+        assert_equal(0, @registry.size)
+      end
+
+
+      def test_clear_registry_task_before_request
+        task_ = RegistryMiddleware::ClearRegistry.new(@registry, :before_request => true)
+        @registry.lookup(:hello, 1)
+        assert_equal(1, @registry.size)
+        task_.pre({})
+        assert_equal(0, @registry.size)
+        task_.post({})
         assert_equal(0, @registry.size)
       end
 

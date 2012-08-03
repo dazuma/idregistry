@@ -64,7 +64,7 @@ module IDRegistry
 
       def initialize  # :nodoc:
         @tasks = []
-        @after_middleware = nil
+        @before_middleware = nil
       end
 
 
@@ -82,9 +82,13 @@ module IDRegistry
       # Rack environment. The registry is cleared only if the block
       # returns a true value. If no block is provided, the registry is
       # always cleared at the end of a request.
+      #
+      # If you set the <tt>:before_request</tt> option to true, the
+      # registry clearing will take place at the beginning of the request
+      # rather than the end.
 
-      def clear_registry(reg_, &condition_)
-        @tasks << RegistryMiddleware::ClearRegistry.new(reg_, &condition_)
+      def clear_registry(reg_, opts_={}, &condition_)
+        @tasks << RegistryMiddleware::ClearRegistry.new(reg_, opts_, &condition_)
         self
       end
 

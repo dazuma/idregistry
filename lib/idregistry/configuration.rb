@@ -260,10 +260,6 @@ module IDRegistry
     #   Add a simple pattern, using the given proc to generate objects
     #   matching that pattern.
     #
-    # [<tt>add_pattern( <i>pattern</i>, <i>to_generate_object</i>, <i>to_generate_tuple</i> )</tt>]
-    #   Add a simple pattern, using the given proc to generate objects
-    #   matching that pattern, and to generate a tuple from an object.
-    #
     # [<tt>add_pattern( <i>pattern</i>, <i>type</i>, <i>to_generate_object</i>, <i>to_generate_tuple</i> )</tt>]
     #   Add a pattern for the given type. You should provide both a proc
     #   to generate objects, and a proc to generate a tuple from an object.

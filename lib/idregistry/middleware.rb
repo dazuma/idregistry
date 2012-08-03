@@ -61,19 +61,25 @@ module IDRegistry
 
       # Create a new ClearRegistry task. You must provide the registry
       # and an optional condition block.
-      def initialize(registry_, &condition_)
+      # If you set the <tt>:before_request</tt> option to true, the
+      # registry clearing will take place at the beginning of the request
+      # rather than the end.
+      def initialize(registry_, opts_={}, &condition_)
         @condition = condition_
         @registry = registry_
+        @before = opts_[:before_request]
       end
 
-      # The pre method for this task does nothing.
+      # The pre method applies if <tt>:before_request</tt> is set.
       def pre(env_)
+        if @before && (!@condition || @condition.call(env_))
+          @registry.clear
+        end
       end
 
-      # The post method for this task clears the registry if the
-      # condition block passes
+      # The pre method applies if <tt>:before_request</tt> is not set.
       def post(env_)
-        if !@condition || @condition.call(env_)
+        if !@before && (!@condition || @condition.call(env_))
           @registry.clear
         end
       end
